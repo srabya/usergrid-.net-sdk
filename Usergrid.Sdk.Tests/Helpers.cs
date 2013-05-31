@@ -1,7 +1,7 @@
-﻿using Newtonsoft.Json;
+﻿using System.Net;
 using NSubstitute;
+using Newtonsoft.Json;
 using RestSharp;
-using System.Net;
 using Usergrid.Sdk.Model;
 
 namespace Usergrid.Sdk.Tests
@@ -29,18 +29,16 @@ namespace Usergrid.Sdk.Tests
             return restResponse;
         }
 
-		public static IUsergridRequest InitializeUserGridRequestWithAccessToken(string accessToken)
-		{
-			var loginResponse = SetUpRestResponseWithData(HttpStatusCode.OK, new LoginResponse {AccessToken = accessToken});
+        public static IUsergridRequest InitializeUserGridRequestWithAccessToken(string accessToken)
+        {
+            IRestResponse<LoginResponse> loginResponse = SetUpRestResponseWithData(HttpStatusCode.OK, new LoginResponse {AccessToken = accessToken});
 
             var request = Substitute.For<IUsergridRequest>();
-			request
-				.Execute<LoginResponse> (Arg.Any<string>(), Arg.Any<Method> (), Arg.Any<object> (), Arg.Any<string> ())
-					.Returns (loginResponse);
+            request
+                .Execute<LoginResponse>(Arg.Any<string>(), Arg.Any<Method>(), Arg.Any<object>(), Arg.Any<string>())
+                .Returns(loginResponse);
 
-			return request;
-		}
+            return request;
+        }
     }
-
-
 }

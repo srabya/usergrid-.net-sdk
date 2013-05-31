@@ -10,11 +10,13 @@ namespace Usergrid.Sdk.Tests
     public class LoginTests
     {
         [Test]
-        public void ShouldPostToCorrectEndPoint()
+        public void ShouldLoginAndSetTheAccessToken()
         {
+            const string accessToken = "access_token";
+
             var restResponse = Substitute.For<IRestResponse<LoginResponse>>();
             restResponse.StatusCode.Returns(HttpStatusCode.OK);
-            restResponse.Data.Returns(new LoginResponse { AccessToken = "access_token" });
+            restResponse.Data.Returns(new LoginResponse {AccessToken = accessToken});
 
             var request = Substitute.For<IUsergridRequest>();
             request
@@ -24,25 +26,7 @@ namespace Usergrid.Sdk.Tests
             var client = new Client(null, null, request: request);
             client.Login(null, null, AuthType.ClientId);
 
-            request.Received(1).Execute<LoginResponse>(Arg.Is("/token"), Arg.Is(Method.POST), Arg.Any<object>(), Arg.Any<string>());
-        }
-
-        [Test]
-        public void ShouldNotPassAccessTokenWhenLoggingIn()
-        {
-            var restResponse = Substitute.For<IRestResponse<LoginResponse>>();
-            restResponse.StatusCode.Returns(HttpStatusCode.OK);
-            restResponse.Data.Returns(new LoginResponse { AccessToken = "access_token" });
-
-            var request = Substitute.For<IUsergridRequest>();
-            request
-                .Execute<LoginResponse>(Arg.Any<string>(), Arg.Any<Method>(), Arg.Any<object>(), Arg.Any<string>())
-                .Returns(restResponse);
-
-            var client = new Client(null, null, request: request);
-            client.Login(null, null, AuthType.ClientId);
-
-            request.Received(1).Execute<LoginResponse>(Arg.Any<string>(), Arg.Any<Method>(), Arg.Any<object>(), Arg.Is((string)null));
+            Assert.That(client.AccessToken, Is.EqualTo(accessToken));
         }
 
         [Test]
@@ -50,7 +34,7 @@ namespace Usergrid.Sdk.Tests
         {
             var restResponse = Substitute.For<IRestResponse<LoginResponse>>();
             restResponse.StatusCode.Returns(HttpStatusCode.OK);
-            restResponse.Data.Returns(new LoginResponse { AccessToken = "access_token" });
+            restResponse.Data.Returns(new LoginResponse {AccessToken = "access_token"});
 
             var request = Substitute.For<IUsergridRequest>();
             request
@@ -77,7 +61,7 @@ namespace Usergrid.Sdk.Tests
         {
             var restResponse = Substitute.For<IRestResponse<LoginResponse>>();
             restResponse.StatusCode.Returns(HttpStatusCode.OK);
-            restResponse.Data.Returns(new LoginResponse { AccessToken = "access_token" });
+            restResponse.Data.Returns(new LoginResponse {AccessToken = "access_token"});
 
             const string clientLoginId = "client_login_id";
             const string clientSecret = "client_secret";
@@ -104,9 +88,45 @@ namespace Usergrid.Sdk.Tests
         }
 
         [Test]
+        public void ShouldNotPassAccessTokenWhenLoggingIn()
+        {
+            var restResponse = Substitute.For<IRestResponse<LoginResponse>>();
+            restResponse.StatusCode.Returns(HttpStatusCode.OK);
+            restResponse.Data.Returns(new LoginResponse {AccessToken = "access_token"});
+
+            var request = Substitute.For<IUsergridRequest>();
+            request
+                .Execute<LoginResponse>(Arg.Any<string>(), Arg.Any<Method>(), Arg.Any<object>(), Arg.Any<string>())
+                .Returns(restResponse);
+
+            var client = new Client(null, null, request: request);
+            client.Login(null, null, AuthType.ClientId);
+
+            request.Received(1).Execute<LoginResponse>(Arg.Any<string>(), Arg.Any<Method>(), Arg.Any<object>(), Arg.Is((string) null));
+        }
+
+        [Test]
+        public void ShouldPostToCorrectEndPoint()
+        {
+            var restResponse = Substitute.For<IRestResponse<LoginResponse>>();
+            restResponse.StatusCode.Returns(HttpStatusCode.OK);
+            restResponse.Data.Returns(new LoginResponse {AccessToken = "access_token"});
+
+            var request = Substitute.For<IUsergridRequest>();
+            request
+                .Execute<LoginResponse>(Arg.Any<string>(), Arg.Any<Method>(), Arg.Any<object>(), Arg.Any<string>())
+                .Returns(restResponse);
+
+            var client = new Client(null, null, request: request);
+            client.Login(null, null, AuthType.ClientId);
+
+            request.Received(1).Execute<LoginResponse>(Arg.Is("/token"), Arg.Is(Method.POST), Arg.Any<object>(), Arg.Any<string>());
+        }
+
+        [Test]
         public void ShouldTranslateToUserGridErrorAndThrowWhenServiceReturnsBadRequest()
         {
-            string restResponseContent = new UsergridError { Description = "Invalid username or password", Error = "invalid_grant" }.Serialize();
+            string restResponseContent = new UsergridError {Description = "Invalid username or password", Error = "invalid_grant"}.Serialize();
 
             var restResponse = Substitute.For<IRestResponse<LoginResponse>>();
             restResponse.StatusCode.Returns(HttpStatusCode.BadRequest);
@@ -129,27 +149,5 @@ namespace Usergrid.Sdk.Tests
                 Assert.AreEqual("Invalid username or password", e.Message);
             }
         }
-
-        [Test]
-        public void ShouldLoginAndSetTheAccessToken()
-        {
-            const string accessToken = "access_token";
-
-            var restResponse = Substitute.For<IRestResponse<LoginResponse>>();
-            restResponse.StatusCode.Returns(HttpStatusCode.OK);
-            restResponse.Data.Returns(new LoginResponse { AccessToken = accessToken });
-
-            var request = Substitute.For<IUsergridRequest>();
-            request
-                .Execute<LoginResponse>(Arg.Any<string>(), Arg.Any<Method>(), Arg.Any<object>(), Arg.Any<string>())
-                .Returns(restResponse);
-
-            var client = new Client(null, null, request: request);
-            client.Login(null, null, AuthType.ClientId);
-
-            Assert.That(client.AccessToken, Is.EqualTo(accessToken));
-        }
-
-      
     }
 }
