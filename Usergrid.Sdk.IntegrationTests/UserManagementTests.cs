@@ -14,7 +14,7 @@ namespace Usergrid.Sdk.IntegrationTests
     }
 
     [TestFixture]
-    public class UserTestManagementTests : BaseTest
+    public class UserManagementTests : BaseTest
     {
         [Test]
         public void ShouldChangePassword()

@@ -24,10 +24,10 @@ namespace Usergrid.Sdk.IntegrationTests
 
 
 	[TestFixture]
-	public class ConnectionManagerTests : BaseTest
+	public class ConnectionTests : BaseTest
 	{
 		[Test]
-		public void ShouldCreateConnection()
+		public void ShouldCreateAndGetConnection()
 		{
 			var client = new Client(Organization, Application);
 			client.Login(ClientId, ClientSecret, AuthType.ClientId);
