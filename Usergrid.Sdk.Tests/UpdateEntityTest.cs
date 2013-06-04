@@ -21,7 +21,7 @@ namespace Usergrid.Sdk.Tests
 
 			var request = Substitute.For<IUsergridRequest>();
 			request
-				.Execute (Arg.Any<string>(), Arg.Any<Method> (), Arg.Any<object> (), Arg.Any<string> ())
+				.Execute (Arg.Any<string>(), Arg.Any<Method> (), Arg.Any<object> ())
 					.Returns(restResponse);
 
 			var client = new Client(null, null, request: request);
@@ -30,8 +30,7 @@ namespace Usergrid.Sdk.Tests
 			request.Received(1).Execute(
 				Arg.Is(string.Format("/{0}/{1}", collectionName, entityName)), 
 				Arg.Is(Method.PUT), 
-				Arg.Is(entityToPost), 
-				Arg.Any<string>());
+				Arg.Is(entityToPost));
 		}
 
 		[Test]
@@ -52,7 +51,7 @@ namespace Usergrid.Sdk.Tests
 
 			var request = Substitute.For<IUsergridRequest>();
 			request
-				.Execute (Arg.Any<string>(), Arg.Any<Method> (), Arg.Any<object> (), Arg.Any<string> ())
+				.Execute (Arg.Any<string>(), Arg.Any<Method> (), Arg.Any<object> ())
 					.Returns(restResponse);
 
 			var client = new Client(null, null, request: request);
@@ -80,7 +79,7 @@ namespace Usergrid.Sdk.Tests
 			restResponse.StatusCode.Returns(HttpStatusCode.OK);
 
 			request
-				.Execute (Arg.Any<string>(), Arg.Any<Method> (), Arg.Any<object> (), Arg.Any<string> ())
+				.Execute (Arg.Any<string>(), Arg.Any<Method> (), Arg.Any<object> ())
 					.Returns (restResponse);
 
 			var client = new Client (null, null, request: request);
@@ -90,8 +89,7 @@ namespace Usergrid.Sdk.Tests
 			request.Received (1).Execute (
 				Arg.Is (string.Format("/{0}/{1}", collectionName, entityName)), 
 				Arg.Is (Method.PUT), 
-				Arg.Is (entityToPost), 
-				accessToken);
+				Arg.Is (entityToPost));
 		}
 	}
 }

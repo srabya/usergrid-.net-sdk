@@ -1,4 +1,5 @@
 ﻿using NUnit.Framework;
+using Usergrid.Sdk.Model;
 
 namespace Usergrid.Sdk.IntegrationTests
 {
@@ -6,21 +7,10 @@ namespace Usergrid.Sdk.IntegrationTests
     public class LoginTests : BaseTest
     {
         [Test]
-        public void ShouldLoginWithClientCredentialsAndSetTheAccessToken()
+        public void ShouldLoginSuccessfullyWithClientCredentials()
         {
             var client = new Client(Organization, Application);
             client.Login(ClientId, ClientSecret, AuthType.ClientId);
-
-            Assert.IsFalse(string.IsNullOrEmpty(client.AccessToken));
-        }
-
-        [Test]
-        public void ShouldLoginWithUserCredentialsAndSetTheAccessToken()
-        {
-            var client = new Client(Organization, Application);
-            client.Login(UserId, UserSecret, AuthType.User);
-
-            Assert.IsFalse(string.IsNullOrEmpty(client.AccessToken));
         }
 
         [Test]

@@ -4,11 +4,8 @@ using Usergrid.Sdk.Model;
 
 namespace Usergrid.Sdk.IntegrationTests
 {
-    public class MyUser : User
+    public class MyUsergridUser : UsergridUser
     {
-        [JsonProperty("email")]
-        public string Email { get; set; }
-
         [JsonProperty("city")]
         public string City { get; set; }
 
@@ -25,15 +22,15 @@ namespace Usergrid.Sdk.IntegrationTests
             var client = new Client(Organization, Application);
             client.Login(ClientId, ClientSecret, AuthType.ClientId);
 
-            var user = client.GetUser<MyUser>("user1");
+            var user = client.GetUser<MyUsergridUser>("user1");
 
             if (user != null)
                 client.DeleteUser("user1");
 
-            user = new MyUser {UserName = "user1", Password = "user1", Email = "user1@gmail.com", City = "city1"};
+            user = new MyUsergridUser {UserName = "user1", Password = "user1", Email = "user1@gmail.com", City = "city1"};
             client.CreateUser(user);
 
-            user = client.GetUser<MyUser>("user1");
+            user = client.GetUser<MyUsergridUser>("user1");
             Assert.IsNotNull(user);
 
             client.Login("user1", "user1", AuthType.User);
@@ -49,16 +46,16 @@ namespace Usergrid.Sdk.IntegrationTests
             var client = new Client(Organization, Application);
             client.Login(ClientId, ClientSecret, AuthType.ClientId);
 
-            var user = client.GetUser<MyUser>("user1");
+            var user = client.GetUser<MyUsergridUser>("user1");
 
             if (user != null)
             {
                 client.DeleteUser("user1");
             }
 
-            user = new MyUser {UserName = "user1", Password = "user1", Email = "user1@gmail.com", City = "city1"};
+            user = new MyUsergridUser {UserName = "user1", Password = "user1", Email = "user1@gmail.com", City = "city1"};
             client.CreateUser(user);
-            user = client.GetUser<MyUser>("user1");
+            user = client.GetUser<MyUsergridUser>("user1");
 
             Assert.IsNotNull(user);
             Assert.AreEqual("user1", user.UserName);
@@ -75,12 +72,12 @@ namespace Usergrid.Sdk.IntegrationTests
             var client = new Client(Organization, Application);
             client.Login(ClientId, ClientSecret, AuthType.ClientId);
 
-            var user = client.GetUser<MyUser>("user1");
+            var user = client.GetUser<MyUsergridUser>("user1");
             if (user == null)
             {
-                user = new MyUser {UserName = "user1", Password = "user1", Email = "user1@gmail.com", City = "city1"};
+                user = new MyUsergridUser {UserName = "user1", Password = "user1", Email = "user1@gmail.com", City = "city1"};
                 client.CreateUser(user);
-                user = client.GetUser<MyUser>("user1");
+                user = client.GetUser<MyUsergridUser>("user1");
             }
             else
             {
@@ -92,7 +89,7 @@ namespace Usergrid.Sdk.IntegrationTests
             user.Password = "user1-2";
             client.UpdateUser(user);
 
-            user = client.GetUser<MyUser>("user1");
+            user = client.GetUser<MyUsergridUser>("user1");
             Assert.IsNotNull(user);
             Assert.AreEqual("user1", user.UserName);
             Assert.AreEqual("user-2@gmail.com", user.Email);

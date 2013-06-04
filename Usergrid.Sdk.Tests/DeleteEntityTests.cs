@@ -21,7 +21,7 @@ namespace Usergrid.Sdk.Tests
             restResponse.StatusCode.Returns(HttpStatusCode.OK);
 
             request
-                .Execute(Arg.Any<string>(), Arg.Any<Method>(), Arg.Any<object>(), Arg.Any<string>())
+                .Execute(Arg.Any<string>(), Arg.Any<Method>(), Arg.Any<object>())
                 .Returns(restResponse);
 
             var client = new Client(null, null, request: request);
@@ -31,8 +31,7 @@ namespace Usergrid.Sdk.Tests
             request.Received(1).Execute(
                 Arg.Is(string.Format("/{0}/{1}", collection, entity)),
                 Arg.Is(Method.DELETE),
-                Arg.Any<object>(),
-                accessToken);
+                Arg.Any<object>());
         }
 
         [Test]
@@ -46,7 +45,7 @@ namespace Usergrid.Sdk.Tests
 
             var request = Substitute.For<IUsergridRequest>();
             request
-                .Execute(Arg.Any<string>(), Arg.Any<Method>(), Arg.Any<object>(), Arg.Any<string>())
+                .Execute(Arg.Any<string>(), Arg.Any<Method>(), Arg.Any<object>())
                 .Returns(restResponse);
 
             var client = new Client(null, null, request: request);
@@ -55,8 +54,7 @@ namespace Usergrid.Sdk.Tests
             request.Received(1).Execute(
                 Arg.Is(string.Format("/{0}/{1}", collection, entity)),
                 Arg.Is(Method.DELETE),
-                Arg.Any<object>(),
-                Arg.Any<string>());
+                Arg.Any<object>());
         }
 
         [Test]
@@ -78,7 +76,7 @@ namespace Usergrid.Sdk.Tests
 
             var request = Substitute.For<IUsergridRequest>();
             request
-                .Execute(Arg.Any<string>(), Arg.Any<Method>(), Arg.Any<object>(), Arg.Any<string>())
+                .Execute(Arg.Any<string>(), Arg.Any<Method>(), Arg.Any<object>())
                 .Returns(restResponse);
 
             var client = new Client(null, null, request: request);

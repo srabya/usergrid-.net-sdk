@@ -18,19 +18,19 @@ namespace Usergrid.Sdk.Tests
             createUserResponse.StatusCode.Returns(HttpStatusCode.OK);
 
             request
-                .Execute(Arg.Any<string>(), Arg.Any<Method>(), Arg.Any<object>(), Arg.Any<string>())
+                .Execute(Arg.Any<string>(), Arg.Any<Method>(), Arg.Any<object>())
                 .Returns(createUserResponse);
 
             var client = new Client(null, null, request: request);
             client.Login(null, null, AuthType.ClientId);
 
-            client.CreateUser(new User {UserName = "username"});
+            client.CreateUser(new UsergridUser {UserName = "username"});
 
             request.Received(1).Execute(
                 Arg.Is("/users"),
                 Arg.Is(Method.POST),
-                Arg.Is<User>(u => (u.UserName.Equals("username"))),
-                Arg.Is(accessToken));
+                Arg.Is<UsergridUser>(u => (u.UserName.Equals("username")))
+                );
         }
 
         [Test]
@@ -41,17 +41,16 @@ namespace Usergrid.Sdk.Tests
 
             var request = Substitute.For<IUsergridRequest>();
             request
-                .Execute(Arg.Any<string>(), Arg.Any<Method>(), Arg.Any<object>(), Arg.Any<string>())
+                .Execute(Arg.Any<string>(), Arg.Any<Method>(), Arg.Any<object>())
                 .Returns(restResponse);
 
             var client = new Client(null, null, request: request);
-            client.CreateUser(new User {UserName = "username"});
+            client.CreateUser(new UsergridUser {UserName = "username"});
 
             request.Received(1).Execute(
                 Arg.Is("/users"),
                 Arg.Is(Method.POST),
-                Arg.Is<User>(u => (u.UserName.Equals("username"))),
-                Arg.Any<string>());
+                Arg.Is<UsergridUser>(u => (u.UserName.Equals("username"))));
         }
 
         [Test]
@@ -70,13 +69,13 @@ namespace Usergrid.Sdk.Tests
 
             var request = Substitute.For<IUsergridRequest>();
             request
-                .Execute(Arg.Any<string>(), Arg.Any<Method>(), Arg.Any<object>(), Arg.Any<string>())
+                .Execute(Arg.Any<string>(), Arg.Any<Method>(), Arg.Any<object>())
                 .Returns(restResponse);
 
             var client = new Client(null, null, request: request);
             try
             {
-                client.CreateUser(new User {UserName = "username"});
+                client.CreateUser(new UsergridUser {UserName = "username"});
                 throw new AssertionException("UserGridException was expected to be thrown here");
             }
             catch (UsergridException e)

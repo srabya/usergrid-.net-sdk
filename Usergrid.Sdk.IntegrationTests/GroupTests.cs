@@ -4,7 +4,7 @@ using Usergrid.Sdk.Model;
 
 namespace Usergrid.Sdk.IntegrationTests
 {
-    public class MyGroup : Group
+    public class MyUsergridGroup : UsergridGroup
     {
         public string Description { get; set; }
     }
@@ -18,14 +18,14 @@ namespace Usergrid.Sdk.IntegrationTests
             var client = new Client(Organization, Application);
             client.Login(ClientId, ClientSecret, AuthType.ClientId);
 
-            var group = client.GetGroup<MyGroup>("group1");
+            var group = client.GetGroup<MyUsergridGroup>("group1");
 
             if (group != null)
                 client.DeleteGroup("group1");
 
-            group = new MyGroup {Path = "group1", Title = "title1", Description = "desc1"};
+            group = new MyUsergridGroup {Path = "group1", Title = "title1", Description = "desc1"};
             client.CreateGroup(group);
-            group = client.GetGroup<MyGroup>("group1");
+            group = client.GetGroup<MyUsergridGroup>("group1");
 
             Assert.IsNotNull(group);
             Assert.AreEqual("group1", group.Path);
@@ -37,7 +37,7 @@ namespace Usergrid.Sdk.IntegrationTests
 
             client.UpdateGroup(group);
 
-            group = client.GetGroup<MyGroup>("group1");
+            group = client.GetGroup<MyUsergridGroup>("group1");
 
             Assert.IsNotNull(group);
             Assert.AreEqual("group1", group.Path);
@@ -46,7 +46,7 @@ namespace Usergrid.Sdk.IntegrationTests
 
             client.DeleteGroup("group1");
 
-            group = client.GetGroup<MyGroup>("group1");
+            group = client.GetGroup<MyUsergridGroup>("group1");
             Assert.IsNull(group);
         }
 
@@ -56,35 +56,35 @@ namespace Usergrid.Sdk.IntegrationTests
             var client = new Client(Organization, Application);
             client.Login(ClientId, ClientSecret, AuthType.ClientId);
 
-            var user = client.GetUser<MyUser>("user1");
+            var user = client.GetUser<MyUsergridUser>("user1");
 
             if (user != null)
             {
                 client.DeleteUser("user1");
             }
 
-            user = new MyUser {UserName = "user1", Password = "user1", Email = "user1@gmail.com", City = "city1"};
+            user = new MyUsergridUser {UserName = "user1", Password = "user1", Email = "user1@gmail.com", City = "city1"};
             client.CreateUser(user);
-            user = client.GetUser<MyUser>("user1");
+            user = client.GetUser<MyUsergridUser>("user1");
             Assert.IsNotNull(user);
 
-            var group = client.GetGroup<MyGroup>("group1");
+            var group = client.GetGroup<MyUsergridGroup>("group1");
 
             if (group != null)
                 client.DeleteGroup("group1");
 
-            group = new MyGroup {Path = "group1", Title = "title1", Description = "desc1"};
+            group = new MyUsergridGroup {Path = "group1", Title = "title1", Description = "desc1"};
             client.CreateGroup(group);
-            group = client.GetGroup<MyGroup>("group1");
+            group = client.GetGroup<MyUsergridGroup>("group1");
             Assert.IsNotNull(group);
 
             client.AddUserToGroup(group.Path, user.UserName);
-            IList<User> users = client.GetAllUsersInGroup<User>(group.Path);
+            IList<UsergridUser> users = client.GetAllUsersInGroup<UsergridUser>(group.Path);
             Assert.IsNotNull(users);
             Assert.AreEqual(1, users.Count);
 
             client.DeleteUserFromGroup("group1", "user1");
-            users = client.GetAllUsersInGroup<User>(group.Path);
+            users = client.GetAllUsersInGroup<UsergridUser>(group.Path);
             Assert.IsNotNull(users);
             Assert.AreEqual(0, users.Count);
 

@@ -4,6 +4,7 @@ using NSubstitute;
 using NUnit.Framework;
 using RestSharp;
 using Usergrid.Sdk.Model;
+using Usergrid.Sdk.Payload;
 
 namespace Usergrid.Sdk.Tests
 {
@@ -21,19 +22,18 @@ namespace Usergrid.Sdk.Tests
 
             var request = Substitute.For<IUsergridRequest>();
             request
-                .Execute(Arg.Any<string>(), Arg.Any<Method>(), Arg.Any<object>(), Arg.Any<string>())
+                .Execute(Arg.Any<string>(), Arg.Any<Method>(), Arg.Any<object>())
                 .Returns(restResponse);
 
             const string collectionName = "collection";
 
             var client = new Client(null, null, request: request);
-            client.GetEntities<Friend>(collectionName);
+            client.GetEntities<Friend>(collectionName, 10);
 
             request.Received(1).Execute(
-                Arg.Is(string.Format("/{0}", collectionName)),
+                Arg.Is(string.Format("/{0}?limit=10", collectionName)),
                 Arg.Is(Method.GET),
-                Arg.Any<object>(),
-                Arg.Any<string>());
+                Arg.Any<object>());
         }
 
         [Test]
@@ -49,20 +49,19 @@ namespace Usergrid.Sdk.Tests
             restResponse.Content.Returns(restResponseContent);
 
             request
-                .Execute(Arg.Any<string>(), Arg.Any<Method>(), Arg.Any<object>(), Arg.Any<string>())
+                .Execute(Arg.Any<string>(), Arg.Any<Method>(), Arg.Any<object>())
                 .Returns(restResponse);
 
             const string collectionName = "collection";
 
             var client = new Client(null, null, request: request);
             client.Login(null, null, AuthType.ClientId);
-            client.GetEntities<Friend>(collectionName);
+            client.GetEntities<Friend>(collectionName, 10);
 
             request.Received(1).Execute(
-                Arg.Is(string.Format("/{0}", collectionName)),
+                Arg.Is(string.Format("/{0}?limit=10", collectionName)),
                 Arg.Is(Method.GET),
-                Arg.Any<object>(),
-                accessToken);
+                Arg.Any<object>());
         }
 
         [Test]
@@ -80,20 +79,20 @@ namespace Usergrid.Sdk.Tests
 
             var request = Substitute.For<IUsergridRequest>();
             request
-                .Execute(Arg.Any<string>(), Arg.Any<Method>(), Arg.Any<object>(), Arg.Any<string>())
+                .Execute(Arg.Any<string>(), Arg.Any<Method>(), Arg.Any<object>())
                 .Returns(restResponse);
 
             string collectionName = "collection";
 
             var client = new Client(null, null, request: request);
-            IList<Friend> friends = client.GetEntities<Friend>(collectionName);
+            var friends = client.GetEntities<Friend>(collectionName, 10);
 
             Assert.IsNotNull(friends);
             Assert.AreEqual(entities.Count, friends.Count);
             Assert.AreEqual(friend1.Name, friends[0].Name);
-            Assert.AreEqual(friend1.Age, friends[0].Age);
+            Assert.AreEqual(friend1.Age, friends[0].Entity.Age);
             Assert.AreEqual(friend2.Name, friends[1].Name);
-            Assert.AreEqual(friend2.Age, friends[1].Age);
+            Assert.AreEqual(friend2.Age, friends[1].Entity.Age);
         }
     }
 }

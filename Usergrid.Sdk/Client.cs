@@ -1,10 +1,12 @@
 ﻿using System;
-using System.Net;
+//using System.Net;
 using Newtonsoft.Json;
 using RestSharp;
 using System.Linq;
 using System.Collections.Generic;
 using Usergrid.Sdk.Model;
+using Usergrid.Sdk.Manager;
+using Usergrid.Sdk.Payload;
 
 namespace Usergrid.Sdk
 {
@@ -12,8 +14,34 @@ namespace Usergrid.Sdk
     {
         private const string UserGridEndPoint = "https://api.usergrid.com";
         private readonly IUsergridRequest _request;
-		private readonly IDictionary<Type, IList<string>> _cursors = new Dictionary<Type, IList<string>>();
-		private readonly IDictionary<Type, int> _cursorPositions = new Dictionary<Type, int> ();
+
+        private IEntityManager _entityManager;
+		private IAuthenticationManager _authenticationManager;
+		private IConnectionManager _connectionManager;
+
+		private IAuthenticationManager AuthenticationManager
+		{
+			get
+			{
+				return _authenticationManager ?? (_authenticationManager = new AuthenticationManager (_request));
+			}
+		}
+
+		private IEntityManager EntityManager 
+		{
+			get
+			{
+				return _entityManager ?? (_entityManager = new EntityManager (_request));
+			}
+		}
+
+		private IConnectionManager ConnectionManager
+		{
+			get
+			{
+				return _connectionManager ?? (_connectionManager = new ConnectionManager (_request));
+			}
+		}
 
         public Client(string organization, string application)
             : this(organization, application, UserGridEndPoint, new UsergridRequest(UserGridEndPoint, organization, application))
@@ -32,107 +60,59 @@ namespace Usergrid.Sdk
 
         public void Login(string loginId, string secret, AuthType authType)
         {
-            if (authType == AuthType.None)
-            {
-                AccessToken = null;
-                return;
-            }
-
-            var body = GetLoginBody(loginId, secret, authType);
-
-            var response = _request.Execute<LoginResponse>("/token", Method.POST, body);
-            ValidateResponse(response);
-
-            AccessToken = response.Data.AccessToken;
-        }
-
-        private object GetLoginBody(string loginId, string secret, AuthType authType)
-        {
-            object body = null;
-
-            if (authType == AuthType.ClientId || authType == AuthType.Application)
-            {
-                body = new ClientIdLoginPayload
-                {
-                    ClientId = loginId,
-                    ClientSecret = secret
-                };
-            }
-            else if (authType == AuthType.User)
-            {
-                body = new UserLoginPayload
-                {
-                    UserName = loginId,
-                    Password = secret
-                };
-            }
-            return body;
+			AuthenticationManager.Login (loginId, secret, authType);
         }
 
         public void CreateEntity<T>(string collection, T entity = null) where T : class
         {
-            IRestResponse response = _request.Execute("/" + collection, Method.POST, entity, AccessToken);
-            ValidateResponse(response);
+            EntityManager.CreateEntity(collection,entity);
         }
 
         public void DeleteEntity(string collection, string name)
         {
-			IRestResponse response = _request.Execute(string.Format("/{0}/{1}", collection, name), Method.DELETE, accessToken: AccessToken);
-            ValidateResponse(response);
+			EntityManager.DeleteEntity(collection, name);
         }
 
-        public void UpdateEntity<T>(string collection, string name, T entity)
+        public void UpdateEntity<T>(string collection, string identifier, T entity)
         {
-			dynamic response = _request.Execute(string.Format("/{0}/{1}", collection, name), Method.PUT, entity, AccessToken);
-            ValidateResponse(response);
+			EntityManager.UpdateEntity (collection, identifier, entity);
         }
 
-		public T GetEntity<T>(string collection, string name)
-		{
-			var response = _request.Execute (string.Format ("/{0}/{1}", collection, name), Method.GET, accessToken: AccessToken);
-
-			if (response.StatusCode == HttpStatusCode.NotFound)
-				return default(T);
-			ValidateResponse (response);
-
-			var entity =  JsonConvert.DeserializeObject<UsergridGetResponse<T>> (response.Content);
-
-			return entity.Entities.FirstOrDefault ();
+        public UsergridEntity<T> GetEntity<T>(string collectionName, string identifer)
+        {
+		    return EntityManager.GetEntity<T>(collectionName, identifer);
 		}
 
-		public T GetUser<T> (string userName) where T : User
+        public T GetUser<T>(string identifer /*username or uuid or email*/) where T : UsergridUser
+        {
+			var user = GetEntity<T> ("users", identifer);
+			if (user == null)
+				return null;
+
+			return user.Entity;
+        }
+
+        public void CreateUser<T>(T user) where T : UsergridUser
+        {
+            CreateEntity("users", user);
+        }
+
+		public void UpdateUser<T>(T user) where T : UsergridUser
 		{
-			return GetEntity<T> ("users", userName);
+            UpdateEntity("users", user.UserName, user);
 		}
 
-		public T GetUserByEmail<T> (string email) where T : User
+        public void DeleteUser(string identifer /*username or uuid or email*/)
 		{
-			return GetEntity<T> ("users", email);
-		}
-
-		public void CreateUser<T>(T user) where T : User
-		{
-			this.CreateEntity ("users", user);
-		}
-
-		public void UpdateUser<T>(T user) where T : User
-		{
-			UpdateEntity("users", user.UserName, user);
-		}
-
-		public void DeleteUser(string userName)
-		{
-			DeleteEntity ("users", userName);
+            DeleteEntity("users", identifer);
 		}
 
         public void ChangePassword(string userName, string oldPassword, string newPassword)
 		{
-            var payload = new ChangePasswordPayload {OldPassword = oldPassword, NewPassword = newPassword};
-            var response = _request.Execute(string.Format("/users/{0}/password", userName), Method.POST, payload);
-            ValidateResponse(response);
+			AuthenticationManager.ChangePassword (userName, oldPassword, newPassword);
 		}
 
-		public void CreateGroup<T>(T group) where T : Group
+		public void CreateGroup<T>(T group) where T : UsergridGroup
 		{
 			CreateEntity ("groups", group);
 		}
@@ -142,12 +122,16 @@ namespace Usergrid.Sdk
 			DeleteEntity ("groups", path);
 		}
 
-		public T GetGroup<T>(string path) where T : Group
+        public T GetGroup<T>(string identifer/*uuid or path*/) where T : UsergridGroup
 		{
-			return GetEntity<T> ("groups", path);
+            var usergridEntity = EntityManager.GetEntity<T>("groups", identifer);
+			if (usergridEntity == null)
+				return null;
+
+            return usergridEntity.Entity; 
 		}
 
-		public void UpdateGroup<T>(T group) where T : Group
+		public void UpdateGroup<T>(T group) where T : UsergridGroup
 		{
 			UpdateEntity<T> ("groups", group.Path, group);
 		}
@@ -162,91 +146,56 @@ namespace Usergrid.Sdk
             DeleteEntity("groups/" + groupName + "/users", userName );
 		}
 
-        public IList<T> GetAllUsersInGroup<T>(string groupName) where T : User
+        public IList<T> GetAllUsersInGroup<T>(string groupName) where T : UsergridUser
         {
-            var response = _request.Execute(string.Format("/groups/{0}/users", groupName) , Method.GET, accessToken: AccessToken);
+            var response = _request.Execute(string.Format("/groups/{0}/users", groupName) , Method.GET);
             ValidateResponse(response);
 
             var responseObject = JsonConvert.DeserializeObject<UsergridGetResponse<T>>(response.Content);
             return responseObject.Entities;
         }
 
-		public IList<T> GetEntities<T>(string collection)
+		public UsergridCollection<UsergridEntity<T>> GetEntities<T>(string collection, int limit)
 		{
-			var response = _request.Execute (string.Format("/{0}", collection), Method.GET, accessToken: AccessToken);
-			ValidateResponse (response);
-
-			var responseObject = JsonConvert.DeserializeObject<UsergridGetResponse<T>> (response.Content);
-
-			int currentCursorPosition = 0;
-			if (_cursors.ContainsKey(typeof(T))){
-				IList<string> thisTypesCursors = _cursors [typeof(T)];
-				thisTypesCursors [0] = null;
-				thisTypesCursors [++currentCursorPosition] = responseObject.Cursor;
-			} else {
-				var cursorsForThisType = new List<string> ();
-				cursorsForThisType.Add (null);
-				cursorsForThisType.Add (responseObject.Cursor);
-				_cursors.Add (typeof(T), cursorsForThisType);
-			}
-
-			if (_cursorPositions.ContainsKey(typeof(T))){
-				_cursorPositions[typeof(T)] = currentCursorPosition;
-			} else {
-				_cursorPositions.Add (typeof(T), currentCursorPosition);
-			}
-
-			return responseObject.Entities;
+			return EntityManager.GetEntities<T>(collection, limit);
 		}
 
-		public IList<T> GetNextEntities<T>(string collection)
+		public UsergridCollection<UsergridEntity<T>> GetNextEntities<T>(string collection)
 		{
-			// get previous cursor position
-			int previousCursorPosition = _cursorPositions [typeof(T)];
-			int nextCursorPosition = ++previousCursorPosition;
-
-			// get next cursor
-			string cursor = _cursors [typeof(T)] [nextCursorPosition];
-
-			var response = _request.Execute (string.Format("/{0}?cursor={1}", collection, cursor), Method.GET, accessToken: AccessToken);
-			ValidateResponse (response);
-
-			var responseObject = JsonConvert.DeserializeObject<UsergridGetResponse<T>> (response.Content);
-
-			_cursors [typeof(T)].Add (responseObject.Cursor);
-			_cursorPositions[typeof(T)] = nextCursorPosition;
-
-			return responseObject.Entities;
+			return EntityManager.GetNextEntities<T> (collection);
 		}
 
-		public IList<T> GetPreviousEntities<T>(string collection)
+		public UsergridCollection<UsergridEntity<T>> GetPreviousEntities<T>(string collection)
 		{
-			// get current cursor position
-			int previousCursorPosition = _cursorPositions [typeof(T)];
-			int nextCursorPosition = --previousCursorPosition;
-
-			// get current cursor
-			string cursor = _cursors [typeof(T)] [nextCursorPosition];
-
-			var response = _request.Execute (string.Format("/{0}?cursor={1}", collection, cursor), Method.GET, accessToken: AccessToken);
-			ValidateResponse (response);
-
-			var responseObject = JsonConvert.DeserializeObject<UsergridGetResponse<T>> (response.Content);
-
-			_cursorPositions[typeof(T)] = nextCursorPosition;
-
-			return responseObject.Entities;
+			return EntityManager.GetPreviousEntities<T> (collection);
 		}
 
-        public string AccessToken { get; private set; }
+		public void CreateConnection<TConnector, TConnectee> (TConnector connector, TConnectee connectee, string connection) where TConnector : Usergrid.Sdk.Model.UsergridEntity where TConnectee : Usergrid.Sdk.Model.UsergridEntity
+        {
+			ConnectionManager.CreateConnection (connector, connectee, connection);
+        }
+
+		public IList<UsergridEntity> GetConnections<TConnector> (TConnector connector, string connection) where TConnector : Usergrid.Sdk.Model.UsergridEntity
+		{
+			return ConnectionManager.GetConnections<TConnector> (connector, connection);
+		}
+
+		public IList<UsergridEntity<TConnectee>> GetConnections<TConnector, TConnectee> (TConnector connector, string connection) where TConnector : Usergrid.Sdk.Model.UsergridEntity where TConnectee : Usergrid.Sdk.Model.UsergridEntity
+		{
+			return ConnectionManager.GetConnections<TConnector, TConnectee> (connector, connection);
+		}
+
+		public void DeleteConnection<TConnector, TConnectee> (TConnector connector, TConnectee connectee, string connection) where TConnector : Usergrid.Sdk.Model.UsergridEntity where TConnectee : Usergrid.Sdk.Model.UsergridEntity
+		{
+			ConnectionManager.DeleteConnection (connector, connectee, connection);
+		}
 
         private static void ValidateResponse(IRestResponse response)
-        {
-            if (response.StatusCode != HttpStatusCode.OK)
-            {
-                var userGridError = JsonConvert.DeserializeObject<UsergridError>(response.Content);
-                throw new UsergridException(userGridError);
-            }
-        }
+		{
+			if (response.StatusCode != System.Net.HttpStatusCode.OK) {
+				var userGridError = JsonConvert.DeserializeObject<UsergridError> (response.Content);
+				throw new UsergridException (userGridError);
+			}
+		}
     }
 }

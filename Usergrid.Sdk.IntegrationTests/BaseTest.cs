@@ -9,8 +9,8 @@ namespace Usergrid.Sdk.IntegrationTests
 	    public BaseTest()
 	    {
             var configMap = new ExeConfigurationFileMap {ExeConfigFilename = "MySettings.config"};
-	        Configuration config = ConfigurationManager.OpenMappedExeConfiguration(configMap, ConfigurationUserLevel.None);
-	        if (config.HasFile)
+			Configuration config = ConfigurationManager.OpenMappedExeConfiguration(configMap, ConfigurationUserLevel.None);
+	        if (config.HasFile && config.AppSettings.Settings.Count > 0)
 	            _config = config;
 	    }
 
