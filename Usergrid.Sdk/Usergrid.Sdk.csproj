@@ -48,6 +48,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Client.cs" />
+    <Compile Include="IClient.cs" />
     <Compile Include="IUsergridRequest.cs" />
     <Compile Include="Model\UsergridEntity.cs" />
     <Compile Include="Model\UsergridError.cs" />

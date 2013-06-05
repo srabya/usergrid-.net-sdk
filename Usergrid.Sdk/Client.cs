@@ -1,8 +1,5 @@
-﻿using System;
-//using System.Net;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using RestSharp;
-using System.Linq;
 using System.Collections.Generic;
 using Usergrid.Sdk.Model;
 using Usergrid.Sdk.Manager;
@@ -10,7 +7,7 @@ using Usergrid.Sdk.Payload;
 
 namespace Usergrid.Sdk
 {
-    public class Client
+    public class Client : IClient
     {
         private const string UserGridEndPoint = "https://api.usergrid.com";
         private readonly IUsergridRequest _request;
@@ -155,17 +152,17 @@ namespace Usergrid.Sdk
             return responseObject.Entities;
         }
 
-		public UsergridCollection<UsergridEntity<T>> GetEntities<T>(string collection, int limit)
+		public UsergridCollection<UsergridEntity<T>> GetEntities<T>(string collection, int limit = 10, string query = null)
 		{
 			return EntityManager.GetEntities<T>(collection, limit);
 		}
 
-		public UsergridCollection<UsergridEntity<T>> GetNextEntities<T>(string collection)
+		public UsergridCollection<UsergridEntity<T>> GetNextEntities<T>(string collection, string query = null)
 		{
 			return EntityManager.GetNextEntities<T> (collection);
 		}
 
-		public UsergridCollection<UsergridEntity<T>> GetPreviousEntities<T>(string collection)
+		public UsergridCollection<UsergridEntity<T>> GetPreviousEntities<T>(string collection, string query = null)
 		{
 			return EntityManager.GetPreviousEntities<T> (collection);
 		}

@@ -57,6 +57,8 @@
     <Compile Include="BaseTest.cs" />
     <Compile Include="ConnectionTests.cs" />
     <Compile Include="EntityPagingTests.cs" />
+    <Compile Include="EntityCrudTests.cs" />
+    <Compile Include="Friend.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

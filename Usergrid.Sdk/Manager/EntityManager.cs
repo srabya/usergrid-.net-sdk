@@ -49,12 +49,16 @@ namespace Usergrid.Sdk.Manager
             return entity.Entities.FirstOrDefault();
         }
 
-		public UsergridCollection<UsergridEntity<T>> GetEntities<T>(string collectionName, int limit)
+		public UsergridCollection<UsergridEntity<T>> GetEntities<T>(string collectionName, int limit = 10, string query = null)
 		{
 			_pageSizes.Remove (typeof(T));
 			_pageSizes.Add (typeof(T), limit);
 
-			IRestResponse response = Request.Execute(string.Format("/{0}?limit={1}", collectionName, limit), Method.GET);
+			var url = string.Format ("/{0}?limit={1}", collectionName, limit);
+			if (query != null)
+				url += "&query=" + query;
+
+			IRestResponse response = Request.Execute(url, Method.GET);
 
 			if (response.StatusCode == HttpStatusCode.NotFound)
 				return new UsergridCollection<UsergridEntity<T>> ();
@@ -78,7 +82,7 @@ namespace Usergrid.Sdk.Manager
 			return collection;
 		}
 
-		public UsergridCollection<UsergridEntity<T>> GetNextEntities<T>(string collectionName)
+		public UsergridCollection<UsergridEntity<T>> GetNextEntities<T>(string collectionName, string query = null)
 		{
 			if (!_cursorStates.ContainsKey(typeof(T)))
 			{
@@ -95,7 +99,11 @@ namespace Usergrid.Sdk.Manager
 
 			var limit = _pageSizes [typeof(T)];
 
-			IRestResponse response = Request.Execute (string.Format("/{0}?cursor={1}&limit={2}", collectionName, cursor, limit), Method.GET);
+			var url = string.Format("/{0}?cursor={1}&limit={2}", collectionName, cursor, limit);
+			if (query != null)
+				url += "&query=" + query;
+
+			IRestResponse response = Request.Execute(url, Method.GET);
 
 			if (response.StatusCode == HttpStatusCode.NotFound)
 				return new UsergridCollection<UsergridEntity<T>> ();
@@ -121,7 +129,7 @@ namespace Usergrid.Sdk.Manager
 			return collection;
 		}
 
-		public UsergridCollection<UsergridEntity<T>> GetPreviousEntities<T>(string collectionName)
+		public UsergridCollection<UsergridEntity<T>> GetPreviousEntities<T>(string collectionName, string query = null)
 		{
 			if (!_cursorStates.ContainsKey(typeof(T)))
 			{
@@ -144,7 +152,11 @@ namespace Usergrid.Sdk.Manager
 				return GetEntities<T> (collectionName, limit);
 			}
 
-			IRestResponse response = Request.Execute (string.Format("/{0}?cursor={1}&limit={2}", collectionName, cursor, limit), Method.GET);
+			var url = string.Format("/{0}?cursor={1}&limit={2}", collectionName, cursor, limit);
+			if (query != null)
+				url += "&query=" + query;
+
+			IRestResponse response = Request.Execute (url, Method.GET);
 
 			if (response.StatusCode == HttpStatusCode.NotFound)
 				return new UsergridCollection<UsergridEntity<T>> ();

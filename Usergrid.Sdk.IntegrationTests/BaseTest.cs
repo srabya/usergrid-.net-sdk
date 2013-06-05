@@ -5,6 +5,8 @@ namespace Usergrid.Sdk.IntegrationTests
 {
 	public class BaseTest
 	{
+		private static Random random = new Random(DateTime.Now.Millisecond);
+
 	    private readonly Configuration _config;
 	    public BaseTest()
 	    {
@@ -48,6 +50,11 @@ namespace Usergrid.Sdk.IntegrationTests
         {
             return _config == null ? ConfigurationManager.AppSettings[key] : _config.AppSettings.Settings[key].Value;
         }
+
+		protected static int GetRandomInteger(int minValue, int maxValue)
+		{
+			return random.Next (minValue, maxValue);
+		}
 	}
 }
 
