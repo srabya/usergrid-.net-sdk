@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using System.Collections;
+using Newtonsoft.Json;
 using RestSharp;
 using System.Collections.Generic;
 using Usergrid.Sdk.Model;
@@ -9,12 +10,13 @@ namespace Usergrid.Sdk
 {
     public class Client : IClient
     {
-        private const string UserGridEndPoint = "https://api.usergrid.com";
+        private const string UserGridEndPoint = "http://api.usergrid.com";
         private readonly IUsergridRequest _request;
 
         private IEntityManager _entityManager;
 		private IAuthenticationManager _authenticationManager;
 		private IConnectionManager _connectionManager;
+        private INotificationsManager _notificationsManager;
 
 		private IAuthenticationManager AuthenticationManager
 		{
@@ -37,6 +39,14 @@ namespace Usergrid.Sdk
 			get
 			{
 				return _connectionManager ?? (_connectionManager = new ConnectionManager (_request));
+			}
+		}
+
+        private INotificationsManager NotificationsManager
+		{
+			get
+			{
+                return _notificationsManager ?? (_notificationsManager = new NotificationsManager(_request));
 			}
 		}
 
@@ -145,7 +155,7 @@ namespace Usergrid.Sdk
 
         public IList<T> GetAllUsersInGroup<T>(string groupName) where T : UsergridUser
         {
-            var response = _request.Execute(string.Format("/groups/{0}/users", groupName) , Method.GET);
+            var response = _request.ExecuteJsonRequest(string.Format("/groups/{0}/users", groupName) , Method.GET);
             ValidateResponse(response);
 
             var responseObject = JsonConvert.DeserializeObject<UsergridGetResponse<T>>(response.Content);
@@ -154,7 +164,7 @@ namespace Usergrid.Sdk
 
 		public UsergridCollection<UsergridEntity<T>> GetEntities<T>(string collection, int limit = 10, string query = null)
 		{
-			return EntityManager.GetEntities<T>(collection, limit);
+			return EntityManager.GetEntities<T>(collection, limit, query);
 		}
 
 		public UsergridCollection<UsergridEntity<T>> GetNextEntities<T>(string collection, string query = null)
@@ -185,6 +195,107 @@ namespace Usergrid.Sdk
 		public void DeleteConnection<TConnector, TConnectee> (TConnector connector, TConnectee connectee, string connection) where TConnector : Usergrid.Sdk.Model.UsergridEntity where TConnectee : Usergrid.Sdk.Model.UsergridEntity
 		{
 			ConnectionManager.DeleteConnection (connector, connectee, connection);
+		}
+
+		public void PostActivity<T>(string userIdentifier, T activity) where T:UsergridActivity
+		{
+			var collection = string.Format ("/users/{0}/activities", userIdentifier);
+			EntityManager.CreateEntity (collection, activity);
+		}
+
+		public void PostActivityToGroup<T>(string groupIdentifier, T activity) where T:UsergridActivity
+		{
+			var collection = string.Format ("/groups/{0}/activities", groupIdentifier);
+			EntityManager.CreateEntity (collection, activity);
+		}
+
+		public void PostActivityToUsersFollowersInGroup<T>(string userIdentifier, string groupIdentifier, T activity) where T:UsergridActivity
+		{
+			var collection = string.Format ("/groups/{0}/users/{1}/activities", groupIdentifier, userIdentifier);
+			EntityManager.CreateEntity (collection, activity);
+		}
+
+		public UsergridCollection<UsergridEntity<T>> GetUserActivities<T>(string userIdentifier) where T:UsergridActivity
+		{
+			var collection = string.Format ("/users/{0}/activities", userIdentifier);
+			return EntityManager.GetEntities<T> (collection);
+		}
+
+		public UsergridCollection<UsergridEntity<T>> GetGroupActivities<T>(string groupIdentifier) where T:UsergridActivity
+		{
+			var collection = string.Format ("/groups/{0}/activities", groupIdentifier);
+			return EntityManager.GetEntities<T> (collection);
+		}
+
+		public T GetDevice<T>(string identifer) where T : UsergridDevice
+		{
+			var device = GetEntity<T> ("devices", identifer);
+			if (device == null)
+				return null;
+
+			return device.Entity;
+		}
+
+		public void UpdateDevice<T>(T device) where T : UsergridDevice
+		{
+			UpdateEntity("devices", device.Name, device);
+		}
+
+		public void CreateDevice<T>(T device) where T : UsergridDevice
+		{
+			CreateEntity ("devices", device);
+		}
+
+		public void DeleteDevice(string identifer)
+		{
+			DeleteEntity("devices", identifer);
+		}
+
+        public void CreateNotifierForApple(string notifierName, string environment, string p12CertificatePath)
+        {
+            NotificationsManager.CreateNotifierForApple(notifierName,environment,p12CertificatePath);
+        }
+        
+        public void CreateNotifierForAndroid(string notifierName, string apiKey)
+        {
+            NotificationsManager.CreateNotifierForAndroid(notifierName,apiKey);
+        }
+
+        public T GetNotifier<T>(string identifer/*uuid or notifier name*/) where T : UsergridNotifier
+        {
+            var usergridNotifier = EntityManager.GetEntity<T>("notifiers", identifer);
+            if (usergridNotifier == null)
+				return null;
+
+            return usergridNotifier.Entity; 
+        }
+
+        public void DeleteNotifier(string notifierName)
+        {
+            EntityManager.DeleteEntity("/notifiers", notifierName);
+        }
+
+		public void PublishNotification (IEnumerable<Notification> notifications, INotificationRecipients recipients, NotificationSchedulerSettings schedulerSettings = null )
+		{
+			NotificationsManager.PublishNotification (notifications, recipients, schedulerSettings);
+		}
+
+        public void CancelNotification(string notificationIdentifier)
+        {
+            EntityManager.UpdateEntity("notifications",notificationIdentifier, new {canceled = true});
+        }
+
+		//TODO: IList?
+		public UsergridCollection<UsergridEntity<T>> GetUserFeed<T>(string userIdentifier) where T:UsergridActivity
+		{
+			var collection = string.Format ("/users/{0}/feed", userIdentifier);
+			return EntityManager.GetEntities<T> (collection);
+		}
+
+		public UsergridCollection<UsergridEntity<T>> GetGroupFeed<T>(string groupIdentifier) where T:UsergridActivity
+		{
+			var collection = string.Format ("/groups/{0}/feed", groupIdentifier);
+			return EntityManager.GetEntities<T> (collection);
 		}
 
         private static void ValidateResponse(IRestResponse response)

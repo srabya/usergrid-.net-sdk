@@ -12,7 +12,7 @@ namespace Usergrid.Sdk.Manager
 		public void ChangePassword (string userName, string oldPassword, string newPassword)
 		{
 			var payload = new ChangePasswordPayload {OldPassword = oldPassword, NewPassword = newPassword};
-			var response = Request.Execute(string.Format("/users/{0}/password", userName), Method.POST, payload);
+			var response = Request.ExecuteJsonRequest(string.Format("/users/{0}/password", userName), Method.POST, payload);
 			ValidateResponse(response);
 		}
 
@@ -26,7 +26,7 @@ namespace Usergrid.Sdk.Manager
 
 			var body = GetLoginBody(loginId, secret, authType);
 
-			var response = Request.Execute<LoginResponse>("/token", Method.POST, body);
+			var response = Request.ExecuteJsonRequest<LoginResponse>("/token", Method.POST, body);
 			ValidateResponse(response);
 
 			Request.AccessToken = response.Data.AccessToken;

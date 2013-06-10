@@ -1,8 +1,12 @@
+using System.Collections.Generic;
 using System.Net;
 using NSubstitute;
 using NUnit.Framework;
+using Newtonsoft.Json;
 using RestSharp;
 using Usergrid.Sdk.Model;
+using System;
+using Usergrid.Sdk.Payload;
 
 namespace Usergrid.Sdk.Tests
 {
@@ -18,7 +22,7 @@ namespace Usergrid.Sdk.Tests
             createEntityResponse.StatusCode.Returns(HttpStatusCode.OK);
 
             request
-                .Execute(Arg.Any<string>(), Arg.Any<Method>(), Arg.Any<object>())
+                .ExecuteJsonRequest(Arg.Any<string>(), Arg.Any<Method>(), Arg.Any<object>())
                 .Returns(createEntityResponse);
 
             var client = new Client(null, null, request: request);
@@ -29,7 +33,7 @@ namespace Usergrid.Sdk.Tests
 
             client.CreateEntity(collectionName, entityToPost);
 
-            request.Received(1).Execute(
+            request.Received(1).ExecuteJsonRequest(
                 Arg.Is(string.Format("/{0}", collectionName)),
                 Arg.Is(Method.POST),
                 Arg.Is(entityToPost));
@@ -46,13 +50,13 @@ namespace Usergrid.Sdk.Tests
 
             var request = Substitute.For<IUsergridRequest>();
             request
-                .Execute(Arg.Any<string>(), Arg.Any<Method>(), Arg.Any<object>())
+                .ExecuteJsonRequest(Arg.Any<string>(), Arg.Any<Method>(), Arg.Any<object>())
                 .Returns(restResponse);
 
             var client = new Client(null, null, request: request);
             client.CreateEntity(collectionName, entityToPost);
 
-            request.Received(1).Execute(
+            request.Received(1).ExecuteJsonRequest(
                 Arg.Is(string.Format("/{0}", collectionName)),
                 Arg.Is(Method.POST),
                 Arg.Is(entityToPost));
@@ -77,7 +81,7 @@ namespace Usergrid.Sdk.Tests
 
             var request = Substitute.For<IUsergridRequest>();
             request
-                .Execute(Arg.Any<string>(), Arg.Any<Method>(), Arg.Any<object>())
+                .ExecuteJsonRequest(Arg.Any<string>(), Arg.Any<Method>(), Arg.Any<object>())
                 .Returns(restResponse);
 
             var client = new Client(null, null, request: request);

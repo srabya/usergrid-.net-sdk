@@ -49,7 +49,7 @@ namespace Usergrid.Sdk.IntegrationTests
             group = client.GetGroup<MyUsergridGroup>("group1");
             Assert.IsNull(group);
         }
-
+        
         [Test]
         public void ShouldManageUsersInGroup()
         {

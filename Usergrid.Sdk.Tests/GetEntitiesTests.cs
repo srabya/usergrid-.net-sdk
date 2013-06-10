@@ -22,7 +22,7 @@ namespace Usergrid.Sdk.Tests
 
             var request = Substitute.For<IUsergridRequest>();
             request
-                .Execute(Arg.Any<string>(), Arg.Any<Method>(), Arg.Any<object>())
+                .ExecuteJsonRequest(Arg.Any<string>(), Arg.Any<Method>(), Arg.Any<object>())
                 .Returns(restResponse);
 
             const string collectionName = "collection";
@@ -30,7 +30,7 @@ namespace Usergrid.Sdk.Tests
             var client = new Client(null, null, request: request);
             client.GetEntities<Friend>(collectionName, 10);
 
-            request.Received(1).Execute(
+            request.Received(1).ExecuteJsonRequest(
                 Arg.Is(string.Format("/{0}?limit=10", collectionName)),
                 Arg.Is(Method.GET),
                 Arg.Any<object>());
@@ -49,7 +49,7 @@ namespace Usergrid.Sdk.Tests
             restResponse.Content.Returns(restResponseContent);
 
             request
-                .Execute(Arg.Any<string>(), Arg.Any<Method>(), Arg.Any<object>())
+                .ExecuteJsonRequest(Arg.Any<string>(), Arg.Any<Method>(), Arg.Any<object>())
                 .Returns(restResponse);
 
             const string collectionName = "collection";
@@ -58,7 +58,7 @@ namespace Usergrid.Sdk.Tests
             client.Login(null, null, AuthType.ClientId);
             client.GetEntities<Friend>(collectionName, 10);
 
-            request.Received(1).Execute(
+            request.Received(1).ExecuteJsonRequest(
                 Arg.Is(string.Format("/{0}?limit=10", collectionName)),
                 Arg.Is(Method.GET),
                 Arg.Any<object>());
@@ -79,7 +79,7 @@ namespace Usergrid.Sdk.Tests
 
             var request = Substitute.For<IUsergridRequest>();
             request
-                .Execute(Arg.Any<string>(), Arg.Any<Method>(), Arg.Any<object>())
+                .ExecuteJsonRequest(Arg.Any<string>(), Arg.Any<Method>(), Arg.Any<object>())
                 .Returns(restResponse);
 
             string collectionName = "collection";

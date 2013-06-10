@@ -18,25 +18,25 @@ namespace Usergrid.Sdk.Manager
 
         public void CreateEntity<T>(string collection, T entity = default(T)) where T : class
         {
-            IRestResponse response = Request.Execute("/" + collection, Method.POST, entity);
+            IRestResponse response = Request.ExecuteJsonRequest("/" + collection, Method.POST, entity);
             ValidateResponse(response);
         }
 
         public void DeleteEntity(string collection, string identifer)
         {
-            IRestResponse response = Request.Execute(string.Format("/{0}/{1}", collection, identifer), Method.DELETE);
+            IRestResponse response = Request.ExecuteJsonRequest(string.Format("/{0}/{1}", collection, identifer), Method.DELETE);
             ValidateResponse(response);
         }
 
         public void UpdateEntity<T>(string collection, string identifer, T entity)
         {
-            IRestResponse response = Request.Execute(string.Format("/{0}/{1}", collection, identifer), Method.PUT, entity);
+            IRestResponse response = Request.ExecuteJsonRequest(string.Format("/{0}/{1}", collection, identifer), Method.PUT, entity);
             ValidateResponse(response);
         }
 
         public UsergridEntity<T> GetEntity<T>(string collectionName, string identifer)
         {
-            IRestResponse response = Request.Execute(string.Format("/{0}/{1}", collectionName, identifer), Method.GET);
+            IRestResponse response = Request.ExecuteJsonRequest(string.Format("/{0}/{1}", collectionName, identifer), Method.GET);
 
             if (response.StatusCode == HttpStatusCode.NotFound)
                 return default(UsergridEntity<T>);
@@ -58,7 +58,7 @@ namespace Usergrid.Sdk.Manager
 			if (query != null)
 				url += "&query=" + query;
 
-			IRestResponse response = Request.Execute(url, Method.GET);
+			IRestResponse response = Request.ExecuteJsonRequest(url, Method.GET);
 
 			if (response.StatusCode == HttpStatusCode.NotFound)
 				return new UsergridCollection<UsergridEntity<T>> ();
@@ -103,7 +103,7 @@ namespace Usergrid.Sdk.Manager
 			if (query != null)
 				url += "&query=" + query;
 
-			IRestResponse response = Request.Execute(url, Method.GET);
+			IRestResponse response = Request.ExecuteJsonRequest(url, Method.GET);
 
 			if (response.StatusCode == HttpStatusCode.NotFound)
 				return new UsergridCollection<UsergridEntity<T>> ();
@@ -156,7 +156,7 @@ namespace Usergrid.Sdk.Manager
 			if (query != null)
 				url += "&query=" + query;
 
-			IRestResponse response = Request.Execute (url, Method.GET);
+			IRestResponse response = Request.ExecuteJsonRequest (url, Method.GET);
 
 			if (response.StatusCode == HttpStatusCode.NotFound)
 				return new UsergridCollection<UsergridEntity<T>> ();

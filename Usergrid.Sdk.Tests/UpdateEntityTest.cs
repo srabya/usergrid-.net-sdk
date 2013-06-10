@@ -21,13 +21,13 @@ namespace Usergrid.Sdk.Tests
 
 			var request = Substitute.For<IUsergridRequest>();
 			request
-				.Execute (Arg.Any<string>(), Arg.Any<Method> (), Arg.Any<object> ())
+				.ExecuteJsonRequest (Arg.Any<string>(), Arg.Any<Method> (), Arg.Any<object> ())
 					.Returns(restResponse);
 
 			var client = new Client(null, null, request: request);
 			client.UpdateEntity (collectionName, entityName, entityToPost);
 
-			request.Received(1).Execute(
+			request.Received(1).ExecuteJsonRequest(
 				Arg.Is(string.Format("/{0}/{1}", collectionName, entityName)), 
 				Arg.Is(Method.PUT), 
 				Arg.Is(entityToPost));
@@ -51,7 +51,7 @@ namespace Usergrid.Sdk.Tests
 
 			var request = Substitute.For<IUsergridRequest>();
 			request
-				.Execute (Arg.Any<string>(), Arg.Any<Method> (), Arg.Any<object> ())
+				.ExecuteJsonRequest (Arg.Any<string>(), Arg.Any<Method> (), Arg.Any<object> ())
 					.Returns(restResponse);
 
 			var client = new Client(null, null, request: request);
@@ -79,14 +79,14 @@ namespace Usergrid.Sdk.Tests
 			restResponse.StatusCode.Returns(HttpStatusCode.OK);
 
 			request
-				.Execute (Arg.Any<string>(), Arg.Any<Method> (), Arg.Any<object> ())
+				.ExecuteJsonRequest (Arg.Any<string>(), Arg.Any<Method> (), Arg.Any<object> ())
 					.Returns (restResponse);
 
 			var client = new Client (null, null, request: request);
 			client.Login (null, null, AuthType.ClientId);
 			client.UpdateEntity (collectionName, entityName, entityToPost);
 
-			request.Received (1).Execute (
+			request.Received (1).ExecuteJsonRequest (
 				Arg.Is (string.Format("/{0}/{1}", collectionName, entityName)), 
 				Arg.Is (Method.PUT), 
 				Arg.Is (entityToPost));

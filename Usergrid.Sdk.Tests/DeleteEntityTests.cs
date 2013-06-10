@@ -21,14 +21,14 @@ namespace Usergrid.Sdk.Tests
             restResponse.StatusCode.Returns(HttpStatusCode.OK);
 
             request
-                .Execute(Arg.Any<string>(), Arg.Any<Method>(), Arg.Any<object>())
+                .ExecuteJsonRequest(Arg.Any<string>(), Arg.Any<Method>(), Arg.Any<object>())
                 .Returns(restResponse);
 
             var client = new Client(null, null, request: request);
             client.Login(null, null, AuthType.ClientId);
             client.DeleteEntity(collection, entity);
 
-            request.Received(1).Execute(
+            request.Received(1).ExecuteJsonRequest(
                 Arg.Is(string.Format("/{0}/{1}", collection, entity)),
                 Arg.Is(Method.DELETE),
                 Arg.Any<object>());
@@ -45,13 +45,13 @@ namespace Usergrid.Sdk.Tests
 
             var request = Substitute.For<IUsergridRequest>();
             request
-                .Execute(Arg.Any<string>(), Arg.Any<Method>(), Arg.Any<object>())
+                .ExecuteJsonRequest(Arg.Any<string>(), Arg.Any<Method>(), Arg.Any<object>())
                 .Returns(restResponse);
 
             var client = new Client(null, null, request: request);
             client.DeleteEntity(collection, entity);
 
-            request.Received(1).Execute(
+            request.Received(1).ExecuteJsonRequest(
                 Arg.Is(string.Format("/{0}/{1}", collection, entity)),
                 Arg.Is(Method.DELETE),
                 Arg.Any<object>());
@@ -76,7 +76,7 @@ namespace Usergrid.Sdk.Tests
 
             var request = Substitute.For<IUsergridRequest>();
             request
-                .Execute(Arg.Any<string>(), Arg.Any<Method>(), Arg.Any<object>())
+                .ExecuteJsonRequest(Arg.Any<string>(), Arg.Any<Method>(), Arg.Any<object>())
                 .Returns(restResponse);
 
             var client = new Client(null, null, request: request);

@@ -50,8 +50,11 @@
     <Compile Include="Client.cs" />
     <Compile Include="IClient.cs" />
     <Compile Include="IUsergridRequest.cs" />
+    <Compile Include="Manager\INotificationsManager.cs" />
+    <Compile Include="Manager\NotificationsManager.cs" />
     <Compile Include="Model\UsergridEntity.cs" />
     <Compile Include="Model\UsergridError.cs" />
+    <Compile Include="Model\UsergridNotifier.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RestSharpJsonSerializer.cs" />
     <Compile Include="UsergridRequest.cs" />
@@ -73,6 +76,18 @@
     <Compile Include="Manager\ConnectionManager.cs" />
     <Compile Include="Model\UsergridCollection.cs" />
     <Compile Include="Model\UsergridEntitySerializer.cs" />
+    <Compile Include="Model\UsergridActivity.cs" />
+    <Compile Include="Model\UsergridActor.cs" />
+    <Compile Include="Model\UsergridImage.cs" />
+    <Compile Include="Model\UnixDateTimeHelper.cs" />
+    <Compile Include="Model\INotificationRecipients.cs" />
+    <Compile Include="Model\NotificationRecipients.cs" />
+    <Compile Include="Model\Notification.cs" />
+    <Compile Include="Model\AndroidNotification.cs" />
+    <Compile Include="Model\AppleNotification.cs" />
+    <Compile Include="Payload\NotificationPayload.cs" />
+    <Compile Include="Model\NotificationSchedulerSettings.cs" />
+    <Compile Include="Model\UsergridDevice.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

@@ -18,7 +18,7 @@ namespace Usergrid.Sdk.Tests
             createUserResponse.StatusCode.Returns(HttpStatusCode.OK);
 
             request
-                .Execute(Arg.Any<string>(), Arg.Any<Method>(), Arg.Any<object>())
+                .ExecuteJsonRequest(Arg.Any<string>(), Arg.Any<Method>(), Arg.Any<object>())
                 .Returns(createUserResponse);
 
             var client = new Client(null, null, request: request);
@@ -26,7 +26,7 @@ namespace Usergrid.Sdk.Tests
 
             client.CreateUser(new UsergridUser {UserName = "username"});
 
-            request.Received(1).Execute(
+            request.Received(1).ExecuteJsonRequest(
                 Arg.Is("/users"),
                 Arg.Is(Method.POST),
                 Arg.Is<UsergridUser>(u => (u.UserName.Equals("username")))
@@ -41,13 +41,13 @@ namespace Usergrid.Sdk.Tests
 
             var request = Substitute.For<IUsergridRequest>();
             request
-                .Execute(Arg.Any<string>(), Arg.Any<Method>(), Arg.Any<object>())
+                .ExecuteJsonRequest(Arg.Any<string>(), Arg.Any<Method>(), Arg.Any<object>())
                 .Returns(restResponse);
 
             var client = new Client(null, null, request: request);
             client.CreateUser(new UsergridUser {UserName = "username"});
 
-            request.Received(1).Execute(
+            request.Received(1).ExecuteJsonRequest(
                 Arg.Is("/users"),
                 Arg.Is(Method.POST),
                 Arg.Is<UsergridUser>(u => (u.UserName.Equals("username"))));
@@ -69,7 +69,7 @@ namespace Usergrid.Sdk.Tests
 
             var request = Substitute.For<IUsergridRequest>();
             request
-                .Execute(Arg.Any<string>(), Arg.Any<Method>(), Arg.Any<object>())
+                .ExecuteJsonRequest(Arg.Any<string>(), Arg.Any<Method>(), Arg.Any<object>())
                 .Returns(restResponse);
 
             var client = new Client(null, null, request: request);

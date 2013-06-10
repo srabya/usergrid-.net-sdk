@@ -3,6 +3,8 @@ using System.Net;
 using Newtonsoft.Json;
 using RestSharp;
 using Usergrid.Sdk.Model;
+using System.Runtime.Serialization;
+using System;
 
 namespace Usergrid.Sdk.Model
 {
@@ -16,6 +18,22 @@ namespace Usergrid.Sdk.Model
         public string Uuid { get; set; }
         public string Type { get; set; }
         public string Name { get; set; }
-        public string Path { get; internal set; }
+
+		[JsonProperty("created")]
+		private long createdLong {  get;  set;}
+
+		[JsonIgnore]
+		public DateTime CreatedDate {
+			get { return createdLong.FromUnixTime(); }
+		}
+
+		[JsonProperty("modified")]
+		private long modifiedLong {  get;  set;}
+
+		[JsonIgnore]
+		public DateTime ModifiedDate {
+			get { return modifiedLong.FromUnixTime(); }
+		}
+
     }
 }

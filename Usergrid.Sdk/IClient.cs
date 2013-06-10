@@ -29,5 +29,22 @@ namespace Usergrid.Sdk
         IList<UsergridEntity> GetConnections<TConnector>(TConnector connector, string connection) where TConnector : UsergridEntity;
         IList<UsergridEntity<TConnectee>> GetConnections<TConnector, TConnectee>(TConnector connector, string connection) where TConnector : UsergridEntity where TConnectee : UsergridEntity;
         void DeleteConnection<TConnector, TConnectee>(TConnector connector, TConnectee connectee, string connection) where TConnector : UsergridEntity where TConnectee : UsergridEntity;
+        void PostActivity<T>(string userIdentifier, T activity) where T:UsergridActivity;
+        void PostActivityToGroup<T>(string groupIdentifier, T activity) where T:UsergridActivity;
+        void PostActivityToUsersFollowersInGroup<T>(string userIdentifier, string groupIdentifier, T activity) where T:UsergridActivity;
+        UsergridCollection<UsergridEntity<T>> GetUserActivities<T>(string userIdentifier) where T:UsergridActivity;
+        UsergridCollection<UsergridEntity<T>> GetGroupActivities<T>(string groupIdentifier) where T:UsergridActivity;
+        void CreateNotifierForApple(string notifierName, string environment, string p12CertificatePath);
+        void CreateNotifierForAndroid(string notifierName, string apiKey);
+        T GetNotifier<T>(string identifer/*uuid or notifier name*/) where T : UsergridNotifier;
+        void DeleteNotifier(string notifierName);
+        UsergridCollection<UsergridEntity<T>> GetUserFeed<T>(string userIdentifier) where T:UsergridActivity;
+        UsergridCollection<UsergridEntity<T>> GetGroupFeed<T>(string groupIdentifier) where T:UsergridActivity;
+        T GetDevice<T>(string identifer) where T : UsergridDevice;
+        void UpdateDevice<T>(T device) where T : UsergridDevice;
+        void CreateDevice<T>(T device) where T : UsergridDevice;
+        void DeleteDevice(string identifer);
+        void PublishNotification (IEnumerable<Notification> notifications, INotificationRecipients recipients, NotificationSchedulerSettings schedulerSettings = null );
+        void CancelNotification(string notificationIdentifier);
     }
 }

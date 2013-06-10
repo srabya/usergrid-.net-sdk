@@ -10,7 +10,7 @@ namespace Usergrid.Sdk
         {
             var serializeObject = JsonConvert.SerializeObject(obj, new JsonSerializerSettings()
                                                                        {
-                                                                           ContractResolver = new CamelCasePropertyNamesContractResolver(),
+                                                                           ContractResolver = new CamelCasePropertyNamesContractResolver()
                                                                        });
             return serializeObject;
         }

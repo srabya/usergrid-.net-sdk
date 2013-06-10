@@ -1,14 +1,13 @@
-﻿using RestSharp;
+﻿using System.Collections.Generic;
+using RestSharp;
 
 namespace Usergrid.Sdk
 {
     internal class UsergridRequest : IUsergridRequest
     {
-        private readonly string _organization;
         private readonly string _application;
+        private readonly string _organization;
         private readonly RestClient _restClient;
-
-        public string AccessToken { get; set; }
 
         public UsergridRequest(string baseUri, string organization, string application)
         {
@@ -17,33 +16,55 @@ namespace Usergrid.Sdk
             _restClient = new RestClient(baseUri);
         }
 
-        public IRestResponse<T> Execute<T>(string resource, Method method, object body = null) where T : new()
+        public string AccessToken { get; set; }
+
+        public IRestResponse<T> ExecuteJsonRequest<T>(string resource, Method method, object body = null) where T : new()
         {
-            var request = GetRequest(resource, method, body);
+            RestRequest request = GetRequest(resource, method);
+            AddBodyAsJson(body, request);
             IRestResponse<T> response = _restClient.Execute<T>(request);
-            return    response;
+            return response;
         }
 
-        public IRestResponse Execute(string resource, Method method, object body = null) 
+        public IRestResponse ExecuteJsonRequest(string resource, Method method, object body = null)
         {
-            var request = GetRequest(resource, method, body);
+            RestRequest request = GetRequest(resource, method);
+            AddBodyAsJson(body, request);
             IRestResponse response = _restClient.Execute(request);
-            return    response;
+            return response;
         }
 
-        private RestRequest GetRequest(string resource, Method method, object body)
+        public IRestResponse ExecuteMultipartFormDataRequest(string resource, Method method, IDictionary<string, object> formParameters, IDictionary<string, string> fileParameters)
         {
-            var request = new RestRequest(string.Format("{0}/{1}{2}", _organization, _application, resource), method)
-                              {
-                                  JsonSerializer = new RestSharpJsonSerializer()
-                              };
+            RestRequest request = GetRequest(resource, method);
+            foreach (var parameter in formParameters)
+            {
+                request.AddParameter(parameter.Key, parameter.Value, ParameterType.GetOrPost);
+            }
+            foreach (var parameter in fileParameters)
+            {
+                request.AddFile(parameter.Key, parameter.Value);
+            }
+
+            IRestResponse response = _restClient.Execute(request);
+            return response;
+        }
+
+        private RestRequest GetRequest(string resource, Method method)
+        {
+            var request = new RestRequest(string.Format("{0}/{1}{2}", _organization, _application, resource), method);
             AddAuthorizationHeader(request);
-			if (body != null)
-			{
-				request.RequestFormat = DataFormat.Json;
-            	request.AddBody(body);
-			}
             return request;
+        }
+
+        private static void AddBodyAsJson(object body, RestRequest request)
+        {
+            if (body != null)
+            {
+                request.JsonSerializer = new RestSharpJsonSerializer();
+                request.RequestFormat = DataFormat.Json;
+                request.AddBody(body);
+            }
         }
 
         private void AddAuthorizationHeader(RestRequest request)
@@ -51,6 +72,5 @@ namespace Usergrid.Sdk
             if (AccessToken != null)
                 request.AddHeader("Authorization", string.Format("Bearer {0}", AccessToken));
         }
-
     }
 }

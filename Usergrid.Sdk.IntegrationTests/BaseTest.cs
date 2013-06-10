@@ -1,5 +1,6 @@
 using System;
 using System.Configuration;
+using Usergrid.Sdk.Model;
 
 namespace Usergrid.Sdk.IntegrationTests
 {
@@ -46,9 +47,30 @@ namespace Usergrid.Sdk.IntegrationTests
 			get{ return GetAppSetting("userSecret");}
 		}
 
+        protected string P12CertificatePath
+		{
+            get { return GetAppSetting("p12CertificatePath"); }
+		}
+
+        protected string GoogleApiKey
+		{
+            get { return GetAppSetting("googleApiKey"); }
+		}
+
         private string GetAppSetting(string key)
         {
             return _config == null ? ConfigurationManager.AppSettings[key] : _config.AppSettings.Settings[key].Value;
+        }
+
+        protected IClient InitializeClientAndLogin(AuthType authType)
+        {
+            var client = new Client(Organization, Application);
+            if (authType == AuthType.Application || authType == AuthType.ClientId)
+                client.Login(ClientId, ClientSecret, authType);
+            else if (authType == AuthType.User)
+                client.Login(UserId, UserSecret, authType);
+
+            return client;
         }
 
 		protected static int GetRandomInteger(int minValue, int maxValue)

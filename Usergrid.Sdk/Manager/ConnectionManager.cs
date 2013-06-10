@@ -14,7 +14,7 @@ namespace Usergrid.Sdk.Manager
 		public void CreateConnection<TConnector, TConnectee> (TConnector connector, TConnectee connectee, string connection) where TConnector : Usergrid.Sdk.Model.UsergridEntity where TConnectee : Usergrid.Sdk.Model.UsergridEntity
 		{
 			// e.g. /user/fred/following/user/barney
-			var response = Request.Execute(string.Format(
+			var response = Request.ExecuteJsonRequest(string.Format(
 				"/{0}/{1}/{2}/{3}/{4}",
 				connector.Type, 
 				connector.Name,
@@ -28,7 +28,7 @@ namespace Usergrid.Sdk.Manager
 		public IList<UsergridEntity> GetConnections<TConnector> (TConnector connector, string connection) where TConnector : Usergrid.Sdk.Model.UsergridEntity
 		{
 			// e.g. /user/fred/following
-			var response = Request.Execute (string.Format("/{0}/{1}/{2}",
+			var response = Request.ExecuteJsonRequest (string.Format("/{0}/{1}/{2}",
 			                                              connector.Type,
 			                                              connector.Name,
 			                                              connection), Method.GET);
@@ -49,7 +49,7 @@ namespace Usergrid.Sdk.Manager
 		public IList<UsergridEntity<TConnectee>> GetConnections<TConnector, TConnectee> (TConnector connector, string connection) where TConnector : Usergrid.Sdk.Model.UsergridEntity where TConnectee : Usergrid.Sdk.Model.UsergridEntity
 		{
 			// e.g. /user/fred/following/user
-			var response = Request.Execute (string.Format("/{0}/{1}/{2}/{3}",
+			var response = Request.ExecuteJsonRequest (string.Format("/{0}/{1}/{2}/{3}",
 			                                              connector.Type,
 			                                              connector.Name,
 			                                              connection,
@@ -69,7 +69,7 @@ namespace Usergrid.Sdk.Manager
 
 		public void DeleteConnection<TConnector, TConnectee> (TConnector connector, TConnectee connectee, string connection) where TConnector : Usergrid.Sdk.Model.UsergridEntity where TConnectee : Usergrid.Sdk.Model.UsergridEntity
 		{
-			var response = Request.Execute(string.Format(
+			var response = Request.ExecuteJsonRequest(string.Format(
 				"/{0}/{1}/{2}/{3}/{4}",
 				connector.Type, 
 				connector.Name,

@@ -19,7 +19,7 @@ namespace Usergrid.Sdk.Tests
 
             var request = Substitute.For<IUsergridRequest>();
             request
-                .Execute(Arg.Any<string>(), Arg.Any<Method>(), Arg.Any<object>())
+                .ExecuteJsonRequest(Arg.Any<string>(), Arg.Any<Method>(), Arg.Any<object>())
                 .Returns(restResponse);
 
             const string collectionName = "collection";
@@ -28,7 +28,7 @@ namespace Usergrid.Sdk.Tests
             var client = new Client(null, null, request: request);
             client.GetEntity<Friend>(collectionName, entityName);
 
-            request.Received(1).Execute(
+            request.Received(1).ExecuteJsonRequest(
                 Arg.Is(string.Format("/{0}/{1}", collectionName, entityName)),
                 Arg.Is(Method.GET),
                 Arg.Any<object>());
@@ -44,7 +44,7 @@ namespace Usergrid.Sdk.Tests
             IRestResponse<UsergridGetResponse<Friend>> restResponse = Helpers.SetUpRestResponseWithContent<UsergridGetResponse<Friend>>(HttpStatusCode.OK, restResponseContent);
 
             request
-                .Execute(Arg.Any<string>(), Arg.Any<Method>(), Arg.Any<object>())
+                .ExecuteJsonRequest(Arg.Any<string>(), Arg.Any<Method>(), Arg.Any<object>())
                 .Returns(restResponse);
 
             const string collectionName = "collection";
@@ -55,7 +55,7 @@ namespace Usergrid.Sdk.Tests
             var friend = client.GetEntity<Friend>(collectionName, entityName);
             Assert.IsNull(friend);
 
-            request.Received(1).Execute(
+            request.Received(1).ExecuteJsonRequest(
                 Arg.Is(string.Format("/{0}/{1}", collectionName, entityName)),
                 Arg.Is(Method.GET),
                 Arg.Any<object>());
@@ -71,7 +71,7 @@ namespace Usergrid.Sdk.Tests
 
             var request = Substitute.For<IUsergridRequest>();
             request
-                .Execute(Arg.Any<string>(), Arg.Any<Method>(), Arg.Any<object>())
+                .ExecuteJsonRequest(Arg.Any<string>(), Arg.Any<Method>(), Arg.Any<object>())
                 .Returns(restResponse);
 
             const string collectionName = "collection";
@@ -98,7 +98,7 @@ namespace Usergrid.Sdk.Tests
 
             var request = Substitute.For<IUsergridRequest>();
             request
-                .Execute(Arg.Any<string>(), Arg.Any<Method>(), Arg.Any<object>())
+                .ExecuteJsonRequest(Arg.Any<string>(), Arg.Any<Method>(), Arg.Any<object>())
                 .Returns(restResponse);
 
             const string collectionName = "collection";
