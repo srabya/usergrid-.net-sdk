@@ -21,7 +21,7 @@ namespace Usergrid.Sdk.Model
 		public INotificationRecipients AddUserWithUuid (string uuid)
 		{
 			if (userName != null)
-				throw new ArgumentException ("sdfsdf");
+				throw new ArgumentException ();
 
 			userUuid = uuid;
 			return this;
