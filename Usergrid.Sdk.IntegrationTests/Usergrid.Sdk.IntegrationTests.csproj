@@ -50,6 +50,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DeviceTests.cs" />
     <Compile Include="GroupTests.cs" />
     <Compile Include="LoginTests.cs" />
     <Compile Include="NotificationTests.cs" />

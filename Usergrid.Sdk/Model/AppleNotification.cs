@@ -9,7 +9,8 @@ namespace Usergrid.Sdk.Model
 
     public class AppleNotification : Notification
     {
-        public AppleNotification(string notifierIdentifier, string message, string sound = null) : base(notifierIdentifier, message)
+        public AppleNotification(string notifierIdentifier, string message, string sound = null)
+            : base(notifierIdentifier, message)
         {
             Sound = sound;
         }
@@ -18,37 +19,16 @@ namespace Usergrid.Sdk.Model
 
         internal override object GetPayload()
         {
-//            dynamic parent = new ExpandoObject();
-//            dynamic child = new ExpandoObject();
-//            dynamic aps = new ExpandoObject();
-//
-//            var parentDict = parent as IDictionary<string, object>;
-//            var childDict = child as IDictionary<string, object>;
-//            var apsDict = aps as IDictionary<string, object>;
-//
-//            if (Sound != null)
-//            {
-//                childDict.Add("alert", Message);
-//                childDict.Add("sound", Sound);
-//
-//                apsDict.Add("abs", childDict);
-//
-//                parentDict.Add(NotifierIdentifier, apsDict);
-//            }
-//            else
-//            {
-//                parentDict.Add(NotifierIdentifier, Message);
-//            }
 
-                        if (Sound != null)
-                        {
-                            return new {aps = new {alert = Message, sound = Sound}};
-                        }
-                        else
-                        {
-                            return Message;
-                        }
+            if (Sound != null)
+            {
+                return new {aps = new {alert = Message, sound = Sound}};
+            }
+            else
+            {
+                return Message;
+            }
         }
     }
-    
+
 }

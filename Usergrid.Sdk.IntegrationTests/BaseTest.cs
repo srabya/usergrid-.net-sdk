@@ -77,6 +77,14 @@ namespace Usergrid.Sdk.IntegrationTests
 		{
 			return random.Next (minValue, maxValue);
 		}
+
+	    protected void DeleteEntityIfExists<TEntity>(IClient client, string collectionName, string entityIdentifier)
+	    {
+	        var customer = client.GetEntity<TEntity>(collectionName, entityIdentifier);
+
+	        if (customer != null)
+	            client.DeleteEntity(collectionName, entityIdentifier);
+	    }
 	}
 }
 

@@ -52,15 +52,24 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CreateEntityTests.cs" />
-    <Compile Include="CreateUserTests.cs" />
-    <Compile Include="DeleteEntityTests.cs" />
-    <Compile Include="GetEntitiesTests.cs" />
-    <Compile Include="GetEntityTests.cs" />
+    <Compile Include="ClientTests\ConnectionTests.cs" />
+    <Compile Include="ClientTests\ActivityTests.cs" />
+    <Compile Include="ClientTests\FeedTests.cs" />
+    <Compile Include="ClientTests\NotificationTests.cs" />
+    <Compile Include="ClientTests\DeviceTests.cs" />
+    <Compile Include="ClientTests\GroupTests.cs" />
+    <Compile Include="ClientTests\UserTests.cs" />
+    <Compile Include="ClientTests\EntityTests.cs" />
+    <Compile Include="ClientTests\LoginTests.cs" />
+    <Compile Include="ConnectionManagerTests.cs" />
+    <Compile Include="UsergridRequestTests.cs" />
+    <Compile Include="Model\NotificationRecipientsTests.cs" />
+    <Compile Include="Model\NotificationTests.cs" />
+    <Compile Include="NotificationsManagerTests.cs" />
+    <Compile Include="EntityManagerTests.cs" />
     <Compile Include="Helpers.cs" />
-    <Compile Include="LoginTests.cs" />
+    <Compile Include="AuthenticationManagerTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="UpdateEntityTest.cs" />
     <Compile Include="Friend.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -72,6 +81,7 @@
       <Name>Usergrid.Sdk</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

@@ -1,84 +1,88 @@
-using System;
-using RestSharp;
 using System.Collections.Generic;
-using Usergrid.Sdk.Model;
+using System.Net;
 using Newtonsoft.Json;
+using RestSharp;
+using Usergrid.Sdk.Model;
 using Usergrid.Sdk.Payload;
 
 namespace Usergrid.Sdk.Manager
 {
-	internal class ConnectionManager : ManagerBase, IConnectionManager
-	{
-		internal ConnectionManager (IUsergridRequest request) : base(request) {}
+    internal class ConnectionManager : ManagerBase, IConnectionManager
+    {
+        internal ConnectionManager(IUsergridRequest request) : base(request)
+        {
+        }
 
-		public void CreateConnection<TConnector, TConnectee> (TConnector connector, TConnectee connectee, string connection) where TConnector : Usergrid.Sdk.Model.UsergridEntity where TConnectee : Usergrid.Sdk.Model.UsergridEntity
-		{
-			// e.g. /user/fred/following/user/barney
-			var response = Request.ExecuteJsonRequest(string.Format(
-				"/{0}/{1}/{2}/{3}/{4}",
-				connector.Type, 
-				connector.Name,
-				connection,
-				connectee.Type,
-				connectee.Name), Method.POST);
+        #region IConnectionManager Members
 
-			ValidateResponse(response);
-		}
+        public void CreateConnection<TConnector, TConnectee>(TConnector connector, TConnectee connectee, string connection) where TConnector : UsergridEntity where TConnectee : UsergridEntity
+        {
+            // e.g. /user/fred/following/user/barney
+            IRestResponse response = Request.ExecuteJsonRequest(string.Format(
+                "/{0}/{1}/{2}/{3}/{4}",
+                connector.Type,
+                connector.Name,
+                connection,
+                connectee.Type,
+                connectee.Name), Method.POST);
 
-		public IList<UsergridEntity> GetConnections<TConnector> (TConnector connector, string connection) where TConnector : Usergrid.Sdk.Model.UsergridEntity
-		{
-			// e.g. /user/fred/following
-			var response = Request.ExecuteJsonRequest (string.Format("/{0}/{1}/{2}",
-			                                              connector.Type,
-			                                              connector.Name,
-			                                              connection), Method.GET);
+            ValidateResponse(response);
+        }
 
-			if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
-			{
-				return default(List<UsergridEntity>);
-			}
+        public IList<UsergridEntity> GetConnections<TConnector>(TConnector connector, string connection) where TConnector : UsergridEntity
+        {
+            // e.g. /user/fred/following
+            IRestResponse response = Request.ExecuteJsonRequest(string.Format("/{0}/{1}/{2}",
+                                                                              connector.Type,
+                                                                              connector.Name,
+                                                                              connection), Method.GET);
 
-			ValidateResponse (response);
+            if (response.StatusCode == HttpStatusCode.NotFound)
+            {
+                return default(List<UsergridEntity>);
+            }
 
-			var entity = JsonConvert.DeserializeObject<UsergridGetResponse<UsergridEntity>>(response.Content);
+            ValidateResponse(response);
 
-			return entity.Entities;
+            var entity = JsonConvert.DeserializeObject<UsergridGetResponse<UsergridEntity>>(response.Content);
 
-		}
+            return entity.Entities;
+        }
 
-		public IList<UsergridEntity<TConnectee>> GetConnections<TConnector, TConnectee> (TConnector connector, string connection) where TConnector : Usergrid.Sdk.Model.UsergridEntity where TConnectee : Usergrid.Sdk.Model.UsergridEntity
-		{
-			// e.g. /user/fred/following/user
-			var response = Request.ExecuteJsonRequest (string.Format("/{0}/{1}/{2}/{3}",
-			                                              connector.Type,
-			                                              connector.Name,
-			                                              connection,
-			                                              typeof(TConnectee).Name), Method.GET);
+        public IList<UsergridEntity<TConnectee>> GetConnections<TConnector, TConnectee>(TConnector connector, string connection) where TConnector : UsergridEntity where TConnectee : UsergridEntity
+        {
+            // e.g. /user/fred/following/user
+            IRestResponse response = Request.ExecuteJsonRequest(string.Format("/{0}/{1}/{2}/{3}",
+                                                                              connector.Type,
+                                                                              connector.Name,
+                                                                              connection,
+                                                                              typeof (TConnectee).Name), Method.GET);
 
-			if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
-			{
-				return default(List<UsergridEntity<TConnectee>>);
-			}
+            if (response.StatusCode == HttpStatusCode.NotFound)
+            {
+                return default(List<UsergridEntity<TConnectee>>);
+            }
 
-			ValidateResponse (response);
+            ValidateResponse(response);
 
-			var entity = JsonConvert.DeserializeObject<UsergridGetResponse<UsergridEntity<TConnectee>>>(response.Content);
+            var entity = JsonConvert.DeserializeObject<UsergridGetResponse<UsergridEntity<TConnectee>>>(response.Content);
 
-			return entity.Entities;
-		}
+            return entity.Entities;
+        }
 
-		public void DeleteConnection<TConnector, TConnectee> (TConnector connector, TConnectee connectee, string connection) where TConnector : Usergrid.Sdk.Model.UsergridEntity where TConnectee : Usergrid.Sdk.Model.UsergridEntity
-		{
-			var response = Request.ExecuteJsonRequest(string.Format(
-				"/{0}/{1}/{2}/{3}/{4}",
-				connector.Type, 
-				connector.Name,
-				connection,
-				connectee.Type,
-				connectee.Name), Method.DELETE);
+        public void DeleteConnection<TConnector, TConnectee>(TConnector connector, TConnectee connectee, string connection) where TConnector : UsergridEntity where TConnectee : UsergridEntity
+        {
+            IRestResponse response = Request.ExecuteJsonRequest(string.Format(
+                "/{0}/{1}/{2}/{3}/{4}",
+                connector.Type,
+                connector.Name,
+                connection,
+                connectee.Type,
+                connectee.Name), Method.DELETE);
 
-			ValidateResponse(response);
-		}
-	}
+            ValidateResponse(response);
+        }
+
+        #endregion
+    }
 }
-

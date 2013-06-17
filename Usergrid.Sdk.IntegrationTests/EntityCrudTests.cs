@@ -29,7 +29,7 @@ namespace Usergrid.Sdk.IntegrationTests
 				client.DeleteEntity ("friends", entityName);
 			}
 
-			// Create a new entity
+            // Create a new entity
 			client.CreateEntity ("friends", friend);
 
 			// Get it back

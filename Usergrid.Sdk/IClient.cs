@@ -6,7 +6,7 @@ namespace Usergrid.Sdk
     public interface IClient
     {
         void Login(string loginId, string secret, AuthType authType);
-        void CreateEntity<T>(string collection, T entity = null) where T : class;
+        UsergridEntity<T> CreateEntity<T>(string collection, T entity) where T : class;
         void DeleteEntity(string collection, string name);
         void UpdateEntity<T>(string collection, string identifier, T entity);
         UsergridEntity<T> GetEntity<T>(string collectionName, string identifer);
@@ -19,8 +19,8 @@ namespace Usergrid.Sdk
         void DeleteGroup(string path);
         T GetGroup<T>(string identifer /*uuid or path*/) where T : UsergridGroup;
         void UpdateGroup<T>(T group) where T : UsergridGroup;
-        void AddUserToGroup(string groupName, string userName);
-        void DeleteUserFromGroup(string groupName, string userName);
+        void AddUserToGroup(string groupIdentifier, string userName);
+        void DeleteUserFromGroup(string groupIdentifier, string userIdentifier);
         IList<T> GetAllUsersInGroup<T>(string groupName) where T : UsergridUser;
         UsergridCollection<UsergridEntity<T>> GetEntities<T>(string collection, int limit = 10, string query = null);
         UsergridCollection<UsergridEntity<T>> GetNextEntities<T>(string collection, string query = null);

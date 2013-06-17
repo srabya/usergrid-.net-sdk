@@ -4,7 +4,7 @@ namespace Usergrid.Sdk.Manager
 {
     public interface IEntityManager
     {
-        void CreateEntity<T>(string collection, T entity = null) where T : class;
+        UsergridEntity<T> CreateEntity<T>(string collection, T entity = null) where T : class;
         void DeleteEntity(string collection, string identifer /*name or uuid*/);
         void UpdateEntity<T>(string collection, string identifer /*name or uuid*/, T entity);
         UsergridEntity<T> GetEntity<T>(string collectionName, string identifer /*name or uuid*/);

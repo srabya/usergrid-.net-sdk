@@ -4,56 +4,73 @@ namespace Usergrid.Sdk.Model
 {
 	public class NotificationRecipients : INotificationRecipients
 	{
-		string userName;
-		string userUuid;
-		string userQuery;
-		string groupPath;
-		string groupQuery;
-		string deviceName;
-		string deviceQuery;
+		string _userName;
+		string _userUuid;
+		string _userQuery;
+		string _groupPath;
+		string _groupQuery;
+		string _deviceName;
+		string _deviceQuery;
 
 		public INotificationRecipients AddUserWithName (string name)
 		{
-			userName = name;
+            if (_userUuid != null)
+                throw new ArgumentException("User name and uuid can not be added at the same time.");
+            _userName = name;
 			return this;
 		}
 
 		public INotificationRecipients AddUserWithUuid (string uuid)
 		{
-			if (userName != null)
-				throw new ArgumentException ();
+			if (_userName != null)
+				throw new ArgumentException ("User name and uuid can not be added at the same time.");
 
-			userUuid = uuid;
+			_userUuid = uuid;
 			return this;
 		}
 
 		public INotificationRecipients AddUserWithQuery (string query)
 		{
-			userQuery = query;
+            if (_userName != null || _userUuid != null)
+                throw new ArgumentException("User query can not be added together with user name or uuid.");
+            
+            _userQuery = query;
 			return this;
 		}
 
 		public INotificationRecipients AddGroupWithPath (string path)
 		{
-			groupPath = path;
+            if (_groupQuery != null)
+                throw new ArgumentException("Group path and query can not be added at the same time.");
+            
+            _groupPath = path;
 			return this;
 		}
 
 		public INotificationRecipients AddGroupWithQuery (string query)
 		{
-			groupQuery = query;
+            if (_groupPath != null)
+                throw new ArgumentException("Group path and query can not be added at the same time.");
+            
+            _groupQuery = query;
 			return this;
 		}
 
 		public INotificationRecipients AddDeviceWithName (string name)
 		{
-			deviceName = name;
+            if (_deviceQuery != null)
+                throw new ArgumentException("Device name and query can not be added at the same time.");
+            
+            _deviceName = name;
 			return this;
 		}
 
 		public INotificationRecipients AddDeviceWithQuery (string query)
 		{
-			deviceQuery = query;
+            if (_deviceName != null)
+                throw new ArgumentException("Device name and query can not be added at the same time.");
+            
+            _deviceQuery = query;
 			return this;
 		}
 
@@ -61,39 +78,39 @@ namespace Usergrid.Sdk.Model
 		{
 			var query = string.Empty;
 
-			if (groupPath != null)
+			if (_groupPath != null)
 			{
-				query += string.Format ("/groups/{0}", groupPath);
+				query += string.Format ("/groups/{0}", _groupPath);
 			}
 
-			if (groupQuery != null)
+			if (_groupQuery != null)
 			{
-				query += string.Format ("/groups;ql={0}", groupQuery);
+				query += string.Format ("/groups;ql={0}", _groupQuery);
 			}
 
-			if (userName != null)
+			if (_userName != null)
 			{
-				query += string.Format ("/users/{0}", userName);
+				query += string.Format ("/users/{0}", _userName);
 			}
 
-			if (userUuid != null)
+			if (_userUuid != null)
 			{
-				query += string.Format ("/users/{0}", userUuid);
+				query += string.Format ("/users/{0}", _userUuid);
 			}
 
-			if (userQuery != null)
+			if (_userQuery != null)
 			{
-				query += string.Format ("/users;ql={0}", userQuery);
+				query += string.Format ("/users;ql={0}", _userQuery);
 			}
 
-			if (deviceName != null)
+			if (_deviceName != null)
 			{
-				query += string.Format ("/devices/{0}", deviceName);
+				query += string.Format ("/devices/{0}", _deviceName);
 			}
 
-			if (deviceQuery != null)
+			if (_deviceQuery != null)
 			{
-				query += string.Format ("/devices;ql={0}", deviceQuery);
+				query += string.Format ("/devices;ql={0}", _deviceQuery);
 			}
 
 			query += "/notifications";

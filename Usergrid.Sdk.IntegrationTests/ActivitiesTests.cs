@@ -10,8 +10,7 @@ namespace Usergrid.Sdk.IntegrationTests
 		[Test]
 		public void ShouldCreateAndRetrieveUserActivities()
 		{
-			var client = new Client(Organization, Application);
-			client.Login(ClientId, ClientSecret, AuthType.ClientId);
+		    var client = InitializeClientAndLogin(AuthType.ClientId);
 
 			// Create a user
 			var username = "user-" + GetRandomInteger (1, 100);

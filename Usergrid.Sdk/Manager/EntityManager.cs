@@ -16,10 +16,15 @@ namespace Usergrid.Sdk.Manager
 
 		internal EntityManager(IUsergridRequest request) : base(request) {}
 
-        public void CreateEntity<T>(string collection, T entity = default(T)) where T : class
+        public UsergridEntity<T> CreateEntity<T>(string collection, T entity = null) where T : class
         {
             IRestResponse response = Request.ExecuteJsonRequest("/" + collection, Method.POST, entity);
             ValidateResponse(response);
+            var settings = new JsonSerializerSettings();
+            settings.Converters.Add(new EntitySerializer());
+            var returnedEntity = JsonConvert.DeserializeObject<UsergridGetResponse<UsergridEntity<T>>>(response.Content, settings);
+
+            return returnedEntity.Entities.FirstOrDefault();
         }
 
         public void DeleteEntity(string collection, string identifer)

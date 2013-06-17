@@ -7,13 +7,13 @@ namespace Usergrid.Sdk
     {
         private readonly string _application;
         private readonly string _organization;
-        private readonly RestClient _restClient;
+        private readonly IRestClient _restClient;
 
-        public UsergridRequest(string baseUri, string organization, string application)
+        public UsergridRequest(string baseUri, string organization, string application, IRestClient restClient = null)
         {
             _organization = organization;
             _application = application;
-            _restClient = new RestClient(baseUri);
+            _restClient = restClient ?? new RestClient(baseUri);
         }
 
         public string AccessToken { get; set; }
