@@ -37,7 +37,7 @@ namespace Usergrid.Sdk.Manager
         {
             object body = null;
 
-            if (authType == AuthType.ClientId || authType == AuthType.Application)
+            if (authType == AuthType.Organization || authType == AuthType.Application)
             {
                 body = new ClientIdLoginPayload
                     {

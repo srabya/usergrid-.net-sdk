@@ -47,10 +47,10 @@ namespace Usergrid.Sdk.Tests.ClientTests
         [Test]
         public void CreateEntityShouldReturnUserGridEntity()
         {
-            var entity = new UsergridEntity<object>();
-            _entityManager.CreateEntity<object>("collection", entity).ReturnsForAnyArgs(entity);
+            var entity = new object();
+            _entityManager.CreateEntity("collection", entity).ReturnsForAnyArgs(entity);
 
-            UsergridEntity<object> returnedEntity = _client.CreateEntity<object>("collection", entity);
+            var returnedEntity = _client.CreateEntity("collection", entity);
 
             Assert.AreEqual(entity, returnedEntity);
         }
@@ -120,10 +120,10 @@ namespace Usergrid.Sdk.Tests.ClientTests
         [Test]
         public void GetEntityShouldReturnEntityFromEntityManager()
         {
-            var entity = new UsergridEntity<object>();
+            var entity = new object();
             _entityManager.GetEntity<object>("collection", "identifier").ReturnsForAnyArgs(entity);
 
-            UsergridEntity<object> createdEntity = _client.GetEntity<object>("collection", "identifier");
+            object createdEntity = _client.GetEntity<object>("collection", "identifier");
 
             Assert.AreEqual(entity, createdEntity);
         }
@@ -133,7 +133,7 @@ namespace Usergrid.Sdk.Tests.ClientTests
         {
             _entityManager.GetEntity<UsergridEntity>("collection", "identifier").Returns(x => null);
 
-            UsergridEntity<UsergridDevice> usergridEntity = _client.GetEntity<UsergridDevice>("collection", "identifier");
+            var usergridEntity = _client.GetEntity<UsergridDevice>("collection", "identifier");
 
             Assert.IsNull(usergridEntity);
         }

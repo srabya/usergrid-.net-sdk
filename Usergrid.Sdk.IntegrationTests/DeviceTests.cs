@@ -10,7 +10,7 @@ namespace Usergrid.Sdk.IntegrationTests
         public void ShouldCrudDevices()
         {
             const string deviceName = "test_device";
-            var client = InitializeClientAndLogin(AuthType.ClientId);
+            var client = InitializeClientAndLogin(AuthType.Organization);
             DeleteDeviceIfExists(client, deviceName);
 
             client.CreateDevice(new UsergridDevice() {Name = deviceName});
@@ -40,14 +40,7 @@ namespace Usergrid.Sdk.IntegrationTests
             Assert.That(myCustomDevice.DeviceType, Is.EqualTo(deviceTypeAndroid));
         }
 
-        private static void DeleteDeviceIfExists(IClient client, string deviceName)
-        {
-            UsergridDevice usergridDevice = client.GetDevice<UsergridDevice>(deviceName);
-            if (usergridDevice != null)
-                client.DeleteDevice(usergridDevice.Uuid);
-        }
-
-        class MyCustomUserGridDevice : UsergridDevice
+        public class MyCustomUserGridDevice : UsergridDevice
         {
             public string DeviceType { get; set; }
         }

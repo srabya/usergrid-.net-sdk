@@ -2,9 +2,9 @@ namespace Usergrid.Sdk.Model
 {
     public enum AuthType
     {
-        ClientId,
+        Organization,
+		Application,
         User,
-        None,
-        Application
+        None
     }
 }

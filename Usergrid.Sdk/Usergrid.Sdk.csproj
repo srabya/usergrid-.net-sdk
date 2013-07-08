@@ -52,6 +52,7 @@
     <Compile Include="IUsergridRequest.cs" />
     <Compile Include="Manager\INotificationsManager.cs" />
     <Compile Include="Manager\NotificationsManager.cs" />
+    <Compile Include="Model\Connection.cs" />
     <Compile Include="Model\UsergridEntity.cs" />
     <Compile Include="Model\UsergridError.cs" />
     <Compile Include="Model\UsergridNotifier.cs" />

@@ -9,7 +9,7 @@ namespace Usergrid.Sdk.Tests.ClientTests
     public class LoginTests
     {
         [TestCase("login1", "secret1", AuthType.Application)]
-        [TestCase("login2", "secret2", AuthType.ClientId)]
+        [TestCase("login2", "secret2", AuthType.Organization)]
         [TestCase("login3", "secret3", AuthType.None)]
         [TestCase("login4", "secret4", AuthType.User)]
         public void LoginShouldDelegateToAuthenticationManagerWithCorrectParameters(string login, string secret, AuthType authType)

@@ -95,7 +95,7 @@ namespace Usergrid.Sdk.Tests.ClientTests
         public void GetDeviceShouldReturnUsergridDevice()
         {
             var usergridDevice = new UsergridDevice();
-            _entityManager.GetEntity<UsergridDevice>("devices", "identifier").Returns(x => new UsergridEntity<UsergridDevice> {Entity = usergridDevice});
+            _entityManager.GetEntity<UsergridDevice>("devices", "identifier").Returns(x => usergridDevice);
 
             var returnedDevice = _client.GetDevice<UsergridDevice>("identifier");
 

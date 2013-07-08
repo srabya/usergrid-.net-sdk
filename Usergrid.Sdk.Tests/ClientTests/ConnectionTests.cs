@@ -26,49 +26,46 @@ namespace Usergrid.Sdk.Tests.ClientTests
         [Test]
         public void CreateConnectionShouldDelegateToConnectionManagerWithCorrectParameters()
         {
-            var connectorEntity = new UsergridEntity();
-            var connecteeEntity = new UsergridEntity();
+            var connection = new Connection();
+            _client.CreateConnection(connection);
 
-            _client.CreateConnection(connectorEntity, connecteeEntity, "connectionName");
-
-            _connectionManager.Received(1).CreateConnection(connectorEntity, connecteeEntity, "connectionName");
+            _connectionManager.Received(1).CreateConnection(connection);
         }
 
         [Test]
         public void DeleteConnectionsShouldDelegateToConnectionManagerWithCorrectParameters()
         {
-            var connectorEntity = new UsergridEntity();
-            var connecteeEntity = new UsergridEntity();
+            var connection = new Connection();
 
-            _client.DeleteConnection(connectorEntity, connecteeEntity, "connectionName");
+            _client.DeleteConnection(connection);
 
-            _connectionManager.Received(1).DeleteConnection(connectorEntity, connecteeEntity, "connectionName");
+            _connectionManager.Received(1).DeleteConnection(connection);
         }
 
         [Test]
         public void GetConnectionsOfSpecificTypeShouldDelegateToConnectionManagerWithCorrectParameters()
         {
-            var connectorEntity = new UsergridEntity();
-            var enityList = new List<UsergridEntity<UsergridEntity>>();
+            var connection = new Connection();
+            var enityList = new List<UsergridEntity>();
 
-            _connectionManager.GetConnections<UsergridEntity, UsergridEntity>(connectorEntity, "connectionName").Returns(enityList);
+            _connectionManager.GetConnections<UsergridEntity>(connection).Returns(enityList);
 
-            IList<UsergridEntity<UsergridEntity>> returnedEntityList = _client.GetConnections<UsergridEntity, UsergridEntity>(connectorEntity, "connectionName");
+            IList<UsergridEntity> returnedEntityList = _client.GetConnections<UsergridEntity>(connection);
 
-            _connectionManager.Received(1).GetConnections<UsergridEntity, UsergridEntity>(connectorEntity, "connectionName");
+            _connectionManager.Received(1).GetConnections<UsergridEntity>(connection);
             Assert.AreEqual(enityList, returnedEntityList);
         }
 
         [Test]
         public void GetConnectionsShouldDelegateToConnectionManagerWithCorrectParameters()
         {
-            var connectorEntity = new UsergridEntity();
+            var connection = new Connection();
             var enityList = new List<UsergridEntity>();
-            _connectionManager.GetConnections(connectorEntity, "connectionName").Returns(enityList);
+            _connectionManager.GetConnections(connection).Returns(enityList);
 
-            IList<UsergridEntity> returnedEntityList = _client.GetConnections(connectorEntity, "connectionName");
+            IList<UsergridEntity> returnedEntityList = _client.GetConnections(connection);
 
-            _connectionManager.Received(1).GetConnections(connectorEntity, "connectionName");
+            _connectionManager.Received(1).GetConnections(connection);
             Assert.AreEqual(enityList, returnedEntityList);
         }
     }

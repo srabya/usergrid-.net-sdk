@@ -20,7 +20,7 @@ namespace Usergrid.Sdk.Tests
             const string clientSecret = "secret";
 
             var authenticationManager = new AuthenticationManager(request);
-            authenticationManager.Login(clientLoginId, clientSecret, AuthType.ClientId);
+            authenticationManager.Login(clientLoginId, clientSecret, AuthType.Organization);
 
             request
                 .Received(1)
@@ -82,7 +82,7 @@ namespace Usergrid.Sdk.Tests
         [Test]
         [TestCase(null, AuthType.None)]
         [TestCase("accessToken1", AuthType.Application)]
-        [TestCase("accessToken2", AuthType.ClientId)]
+        [TestCase("accessToken2", AuthType.Organization)]
         [TestCase("accessToken4", AuthType.User)]
         public void ShouldSetTheAccessToken(string accessToken, AuthType authType)
         {
@@ -107,7 +107,7 @@ namespace Usergrid.Sdk.Tests
             var authenticationManager = new AuthenticationManager(request);
             try
             {
-                authenticationManager.Login(null, null, AuthType.ClientId);
+                authenticationManager.Login(null, null, AuthType.Organization);
                 throw new AssertionException("UserGridException was expected to be thrown here");
             }
             catch (UsergridException e)

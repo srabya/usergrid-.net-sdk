@@ -30,7 +30,7 @@ namespace Usergrid.Sdk.Tests.ClientTests
         {
             _client.AddUserToGroup("groupIdentifier", "userIdentifier");
 
-            _entityManager.Received(1).CreateEntity<object>("/groups/groupIdentifier/users/userIdentifier");
+            _entityManager.Received(1).CreateEntity<object>("/groups/groupIdentifier/users/userIdentifier", null);
         }
 
         [Test]
@@ -114,7 +114,7 @@ namespace Usergrid.Sdk.Tests.ClientTests
         public void GetGroupShouldReturnUsergridGroup()
         {
             var usergridGroup = new UsergridGroup();
-            _entityManager.GetEntity<UsergridGroup>("groups", "identifier").Returns(x => new UsergridEntity<UsergridGroup> {Entity = usergridGroup});
+            _entityManager.GetEntity<UsergridGroup>("groups", "identifier").Returns(x => usergridGroup);
 
             var returnedGroup = _client.GetGroup<UsergridGroup>("identifier");
 

@@ -37,6 +37,16 @@ namespace Usergrid.Sdk.IntegrationTests
 			get{ return GetAppSetting("clientSecret");}
 		}
 
+		protected string ApplicationId
+		{
+			get {return GetAppSetting("applicationId");}
+		}
+
+		protected string ApplicationSecret
+		{
+			get {return GetAppSetting ("applicationSecret");}
+		}
+
 		protected string UserId
 		{
 			get { return GetAppSetting("userId");}
@@ -65,7 +75,7 @@ namespace Usergrid.Sdk.IntegrationTests
         protected IClient InitializeClientAndLogin(AuthType authType)
         {
             var client = new Client(Organization, Application);
-            if (authType == AuthType.Application || authType == AuthType.ClientId)
+            if (authType == AuthType.Application || authType == AuthType.Organization)
                 client.Login(ClientId, ClientSecret, authType);
             else if (authType == AuthType.User)
                 client.Login(UserId, UserSecret, authType);
@@ -80,10 +90,41 @@ namespace Usergrid.Sdk.IntegrationTests
 
 	    protected void DeleteEntityIfExists<TEntity>(IClient client, string collectionName, string entityIdentifier)
 	    {
-	        var customer = client.GetEntity<TEntity>(collectionName, entityIdentifier);
+	        TEntity customer = client.GetEntity<TEntity>(collectionName, entityIdentifier);
 
 	        if (customer != null)
 	            client.DeleteEntity(collectionName, entityIdentifier);
+	    }
+
+	    protected void DeleteDeviceIfExists(IClient client, string deviceName)
+	    {
+	        UsergridDevice usergridDevice = client.GetDevice<UsergridDevice>(deviceName);
+	        if (usergridDevice != null)
+	            client.DeleteDevice(usergridDevice.Uuid);
+	    }
+
+        protected void DeleteUserIfExists(IClient client, string userName)
+	    {
+            UsergridUser existingUser = client.GetUser<UsergridUser>(userName);
+            if (existingUser != null)
+                client.DeleteUser(existingUser.Uuid);
+        }
+
+        protected UsergridUser SetupUsergridUser(IClient client, UsergridUser user)
+	    {
+            DeleteUserIfExists(client, user.UserName);
+            client.CreateUser(user);
+            return client.GetUser<UsergridUser>(user.UserName);
+	    }
+        
+        protected UsergridGroup SetupUsergridGroup(IClient client, UsergridGroup @group)
+	    {
+	        var existingGroup = client.GetGroup<UsergridGroup>(@group.Path);
+            if (existingGroup != null)
+                client.DeleteGroup(existingGroup.Path);
+            client.CreateGroup(@group);
+            return client.GetGroup<UsergridGroup>(@group.Path);
+
 	    }
 	}
 }

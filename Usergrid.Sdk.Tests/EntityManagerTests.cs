@@ -35,15 +35,15 @@ namespace Usergrid.Sdk.Tests
                 .ExecuteJsonRequest(Arg.Any<string>(), Arg.Any<Method>(), Arg.Any<object>())
                 .Returns(restResponse);
 
-            UsergridEntity<Friend> returnedEntity = _entityManager.CreateEntity(collectionName, entityToPost);
+            Friend returnedEntity = _entityManager.CreateEntity(collectionName, entityToPost);
 
             _request.Received(1).ExecuteJsonRequest(
                 Arg.Is(string.Format("/{0}", collectionName)),
                 Arg.Is(Method.POST),
                 Arg.Is(entityToPost));
 
-            Assert.AreEqual(entityToPost.Age, returnedEntity.Entity.Age);
-            Assert.AreEqual(entityToPost.Name, returnedEntity.Entity.Name);
+            Assert.AreEqual(entityToPost.Age, returnedEntity.Age);
+            Assert.AreEqual(entityToPost.Name, returnedEntity.Name);
         }
 
         [Test]
@@ -171,14 +171,11 @@ namespace Usergrid.Sdk.Tests
             const string collectionName = "collection";
             const string identifier = "identifier";
 
-            UsergridEntity<Friend> returnedFriend = _entityManager.GetEntity<Friend>(collectionName, identifier);
+            Friend returnedFriend = _entityManager.GetEntity<Friend>(collectionName, identifier);
 
             Assert.IsNotNull(returnedFriend);
             Assert.AreEqual(friend.Name, returnedFriend.Name);
-            Assert.AreEqual(friend.Age, returnedFriend.Entity.Age);
-            Assert.AreEqual(DateTime.Parse("Sun, 16 Jun 2013 22:11:47") , returnedFriend.CreatedDate);
-            Assert.AreEqual(DateTime.Parse("Sun, 16 Jun 2013 22:11:47"), returnedFriend.ModifiedDate);
-            Assert.AreEqual(returnedFriend.ModifiedDate.ToUnixTime(), 1371420707691);
+            Assert.AreEqual(friend.Age, returnedFriend.Age);
         }
 
 
@@ -199,11 +196,11 @@ namespace Usergrid.Sdk.Tests
             const string collectionName = "collection";
             const string identifier = "identifier";
 
-            UsergridEntity<Friend> returnedFriend = _entityManager.GetEntity<Friend>(collectionName, identifier);
+            Friend returnedFriend = _entityManager.GetEntity<Friend>(collectionName, identifier);
 
             Assert.IsNotNull(returnedFriend);
             Assert.AreEqual(friend1.Name, returnedFriend.Name);
-            Assert.AreEqual(friend1.Age, returnedFriend.Entity.Age);
+            Assert.AreEqual(friend1.Age, returnedFriend.Age);
         }
 
 
@@ -297,9 +294,9 @@ namespace Usergrid.Sdk.Tests
             Assert.IsNotNull(friends);
             Assert.AreEqual(entities.Count, friends.Count);
             Assert.AreEqual(friend1.Name, friends[0].Name);
-            Assert.AreEqual(friend1.Age, friends[0].Entity.Age);
+            Assert.AreEqual(friend1.Age, friends[0].Age);
             Assert.AreEqual(friend2.Name, friends[1].Name);
-            Assert.AreEqual(friend2.Age, friends[1].Entity.Age);
+            Assert.AreEqual(friend2.Age, friends[1].Age);
         }
 
         [Test]
@@ -339,20 +336,20 @@ namespace Usergrid.Sdk.Tests
                 .ExecuteJsonRequest("/collection?cursor=cursor2&limit=10", Method.GET, Arg.Is<object>(x => x == null))
                 .Returns(restResponse3);
 
-            UsergridCollection<UsergridEntity<Friend>> list1 = _entityManager.GetEntities<Friend>("collection");
-            UsergridCollection<UsergridEntity<Friend>> list2 = _entityManager.GetNextEntities<Friend>("collection");
-            UsergridCollection<UsergridEntity<Friend>> list3 = _entityManager.GetNextEntities<Friend>("collection");
+            UsergridCollection<Friend> list1 = _entityManager.GetEntities<Friend>("collection");
+            UsergridCollection<Friend> list2 = _entityManager.GetNextEntities<Friend>("collection");
+            UsergridCollection<Friend> list3 = _entityManager.GetNextEntities<Friend>("collection");
 
-            Assert.AreEqual(entities1[0].Name,list1[0].Entity.Name);
-            Assert.AreEqual(entities1[1].Age,list1[1].Entity.Age);
+            Assert.AreEqual(entities1[0].Name,list1[0].Name);
+            Assert.AreEqual(entities1[1].Age,list1[1].Age);
             Assert.IsTrue(list1.HasNext);
             Assert.IsFalse(list1.HasPrevious);
-            Assert.AreEqual(entities2[0].Name,list2[0].Entity.Name);
-            Assert.AreEqual(entities2[1].Age,list2[1].Entity.Age);
+            Assert.AreEqual(entities2[0].Name,list2[0].Name);
+            Assert.AreEqual(entities2[1].Age,list2[1].Age);
             Assert.IsTrue(list2.HasNext);
             Assert.IsTrue(list2.HasPrevious);
-            Assert.AreEqual(entities3[0].Name,list3[0].Entity.Name);
-            Assert.AreEqual(entities3[1].Age,list3[1].Entity.Age);
+            Assert.AreEqual(entities3[0].Name,list3[0].Name);
+            Assert.AreEqual(entities3[1].Age,list3[1].Age);
             Assert.IsFalse(list3.HasNext);
             Assert.IsTrue(list3.HasPrevious);
         }
@@ -392,34 +389,34 @@ namespace Usergrid.Sdk.Tests
                 .ExecuteJsonRequest("/collection?&limit=10", Method.GET, Arg.Is<object>(x => x == null))
                 .Returns(restResponse1);
 
-            UsergridCollection<UsergridEntity<Friend>> list1 = _entityManager.GetEntities<Friend>("collection");
-            UsergridCollection<UsergridEntity<Friend>> list2 = _entityManager.GetNextEntities<Friend>("collection");
-            UsergridCollection<UsergridEntity<Friend>> list3 = _entityManager.GetNextEntities<Friend>("collection");
-            UsergridCollection<UsergridEntity<Friend>> list4 = _entityManager.GetPreviousEntities<Friend>("collection");
-            UsergridCollection<UsergridEntity<Friend>> list5 = _entityManager.GetPreviousEntities<Friend>("collection");
+            UsergridCollection<Friend> list1 = _entityManager.GetEntities<Friend>("collection");
+            UsergridCollection<Friend> list2 = _entityManager.GetNextEntities<Friend>("collection");
+            UsergridCollection<Friend> list3 = _entityManager.GetNextEntities<Friend>("collection");
+            UsergridCollection<Friend> list4 = _entityManager.GetPreviousEntities<Friend>("collection");
+            UsergridCollection<Friend> list5 = _entityManager.GetPreviousEntities<Friend>("collection");
 
-            Assert.AreEqual(entities1[0].Name,list1[0].Entity.Name);
-            Assert.AreEqual(entities1[1].Age,list1[1].Entity.Age);
+            Assert.AreEqual(entities1[0].Name,list1[0].Name);
+            Assert.AreEqual(entities1[1].Age,list1[1].Age);
             Assert.IsTrue(list1.HasNext);
             Assert.IsFalse(list1.HasPrevious);
 
-            Assert.AreEqual(entities2[0].Name,list2[0].Entity.Name);
-            Assert.AreEqual(entities2[1].Age,list2[1].Entity.Age);
+            Assert.AreEqual(entities2[0].Name,list2[0].Name);
+            Assert.AreEqual(entities2[1].Age,list2[1].Age);
             Assert.IsTrue(list2.HasNext);
             Assert.IsTrue(list2.HasPrevious);
             
-            Assert.AreEqual(entities3[0].Name,list3[0].Entity.Name);
-            Assert.AreEqual(entities3[1].Age,list3[1].Entity.Age);
+            Assert.AreEqual(entities3[0].Name,list3[0].Name);
+            Assert.AreEqual(entities3[1].Age,list3[1].Age);
             Assert.IsFalse(list3.HasNext);
             Assert.IsTrue(list3.HasPrevious);
 
-            Assert.AreEqual(entities2[0].Name, list4[0].Entity.Name);
-            Assert.AreEqual(entities2[1].Age, list4[1].Entity.Age);
+            Assert.AreEqual(entities2[0].Name, list4[0].Name);
+            Assert.AreEqual(entities2[1].Age, list4[1].Age);
             Assert.IsTrue(list4.HasNext);
             Assert.IsTrue(list4.HasPrevious);
 
-            Assert.AreEqual(entities1[0].Name, list5[0].Entity.Name);
-            Assert.AreEqual(entities1[1].Age, list5[1].Entity.Age);
+            Assert.AreEqual(entities1[0].Name, list5[0].Name);
+            Assert.AreEqual(entities1[1].Age, list5[1].Age);
             Assert.IsTrue(list5.HasNext);
             Assert.IsFalse(list5.HasPrevious);
         }

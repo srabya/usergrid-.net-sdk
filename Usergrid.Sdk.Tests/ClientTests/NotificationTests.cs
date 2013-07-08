@@ -110,14 +110,13 @@ namespace Usergrid.Sdk.Tests.ClientTests
         }
 
         [Test]
-        public void GetNotifierShouldReturnUsergridNotifierFromEntityManager()
-        {
-            var entity = new UsergridEntity<UsergridNotifier> {Entity = new UsergridNotifier()};
+        public void GetNotifierShouldReturnUsergridNotifierFromEntityManager() {
+            var entity = new UsergridNotifier();
             _entityManager.GetEntity<UsergridNotifier>("/notifiers", "notifierIdentifier").Returns(x => entity);
 
             var returnedEntity = _client.GetNotifier<UsergridNotifier>("notifierIdentifier");
 
-            Assert.AreEqual(entity.Entity, returnedEntity);
+            Assert.AreEqual(entity, returnedEntity);
         }
 
         [Test]

@@ -17,7 +17,7 @@ namespace Usergrid.Sdk.IntegrationTests
 		public void ShouldDoPaging()
 		{
 			var client = new Client(Organization, Application);
-			client.Login(ClientId, ClientSecret, AuthType.ClientId);
+			client.Login(ClientId, ClientSecret, AuthType.Organization);
 
 			for (var i=0; i<20; i++) 
 			{
@@ -40,22 +40,22 @@ namespace Usergrid.Sdk.IntegrationTests
 			Assert.AreEqual (3, collection.Count);
 			Assert.IsTrue (collection.HasNext);
 			Assert.IsFalse (collection.HasPrevious);
-			Assert.AreEqual ("page-1", collection [1].Entity.Name);
+			Assert.AreEqual ("page-1", collection [1].Name);
 
 			collection = client.GetNextEntities<Page> ("pages");
 			Assert.IsTrue (collection.HasNext);
 			Assert.IsTrue (collection.HasPrevious);
-			Assert.AreEqual ("page-4", collection [1].Entity.Name);
+			Assert.AreEqual ("page-4", collection [1].Name);
 
 			collection = client.GetNextEntities<Page> ("pages");
 			Assert.IsTrue (collection.HasNext);
 			Assert.IsTrue (collection.HasPrevious);
-			Assert.AreEqual ("page-7", collection [1].Entity.Name);
+			Assert.AreEqual ("page-7", collection [1].Name);
 
 			collection = client.GetPreviousEntities<Page> ("pages");
 			Assert.IsTrue (collection.HasNext);
 			Assert.IsTrue (collection.HasPrevious);
-			Assert.AreEqual ("page-4", collection [1].Entity.Name);
+			Assert.AreEqual ("page-4", collection [1].Name);
 
 			for (var i=0; i<20; i++) 
 			{

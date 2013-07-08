@@ -105,7 +105,7 @@ namespace Usergrid.Sdk.Tests.ClientTests
         public void GetUserShouldReturnUsergridUser()
         {
             var usergridUser = new UsergridUser();
-            _entityManager.GetEntity<UsergridUser>("users", "identifier").Returns((x) => new UsergridEntity<UsergridUser> {Entity = usergridUser});
+            _entityManager.GetEntity<UsergridUser>("users", "identifier").Returns((x) => usergridUser);
 
             var returnedUser = _client.GetUser<UsergridUser>("identifier");
 

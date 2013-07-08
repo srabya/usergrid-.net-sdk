@@ -16,7 +16,7 @@ namespace Usergrid.Sdk.IntegrationTests
         public void ShouldManageGroupLifecycle()
         {
             var client = new Client(Organization, Application);
-            client.Login(ClientId, ClientSecret, AuthType.ClientId);
+            client.Login(ClientId, ClientSecret, AuthType.Organization);
 
             var group = client.GetGroup<MyUsergridGroup>("group1");
 
@@ -54,29 +54,10 @@ namespace Usergrid.Sdk.IntegrationTests
         public void ShouldManageUsersInGroup()
         {
             var client = new Client(Organization, Application);
-            client.Login(ClientId, ClientSecret, AuthType.ClientId);
+            client.Login(ClientId, ClientSecret, AuthType.Organization);
 
-            var user = client.GetUser<MyUsergridUser>("user1");
-
-            if (user != null)
-            {
-                client.DeleteUser("user1");
-            }
-
-            user = new MyUsergridUser {UserName = "user1", Password = "user1", Email = "user1@gmail.com", City = "city1"};
-            client.CreateUser(user);
-            user = client.GetUser<MyUsergridUser>("user1");
-            Assert.IsNotNull(user);
-
-            var group = client.GetGroup<MyUsergridGroup>("group1");
-
-            if (group != null)
-                client.DeleteGroup("group1");
-
-            group = new MyUsergridGroup {Path = "group1", Title = "title1", Description = "desc1"};
-            client.CreateGroup(group);
-            group = client.GetGroup<MyUsergridGroup>("group1");
-            Assert.IsNotNull(group);
+            var user = SetupUsergridUser(client, new MyUsergridUser {UserName = "user1", Password = "user1", Email = "user1@gmail.com", City = "city1"});
+            var group = SetupUsergridGroup(client, new MyUsergridGroup {Path = "group1", Title = "title1", Description = "desc1"});
 
             client.AddUserToGroup(group.Path, user.UserName);
             IList<UsergridUser> users = client.GetAllUsersInGroup<UsergridUser>(group.Path);
