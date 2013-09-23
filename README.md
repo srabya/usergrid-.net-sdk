@@ -19,7 +19,6 @@ The .NET SDK is provided by [Apigee](http://apigee.com) and is available as an o
 You can download this package here:
 
 * Download as a [zip file][ZipFileLocation]
-* Download as a [tar.gz file][TarGzFileLocation]
 
 To find out more about Apigee App Services, see:
 
@@ -33,13 +32,9 @@ To view the Apigee App Services documentation, see:
 Usergrid .NET SDK can be installed via:
 
 * Build source and reference Usergrid.Sdk assembly OR
-* Use Nuget
 
 ### Building from Source
 If you prefer to build the assembly from source, head over to [here][RepositoryLocation], download/clone the source files and build. Source can be compiled via VS Studio 2010 or using Xamarin tools.
-
-### Using Nuget
-@TODO
 
 ### Getting Started
 The main facade to all SDK functionality is provided by the Client class (which can also be injected using IClient):
@@ -122,7 +117,7 @@ The Collection object models Collections in the database.  Once you start progra
 
 SDK defines a class UsergridCollection<T> in order to model collections. Implementation inherits from List<T> and also supports paging within the collection items.
 
-Please see @TODO link to EntityPagingTests.cs for example paging implementation.
+Please see [EntityPagingTests.cs][] for example paging implementation.
 
 ## Users and Groups
 ```
@@ -242,7 +237,7 @@ IList<Order> orderConnections = client.GetConnections<Order>(new Connection()
         ConnectionName = "has"
     });
 ```
-Check [ConnectionTests.cs][] for the integration tests, and documentation on [Entity relationships][UsergridEntityRrelationshipsDoc].
+Check [ConnectionTests.cs][] for the integration tests, and documentation on [Entity relationships][UsergridEntityRelationshipsDoc].
 
 ## Push Notifications
 
@@ -304,22 +299,21 @@ Integration tests are in [NotificationTests.cs][], and you can read about the pu
 
 
 <!---Code reference-->
-[GroupTests.cs]: @TODO
-[UserManagementTests.cs]: @TODO
-[ActivitiesTests.cs]: @TODO
-[DeviceTests.cs]: @TODO
-[Connection]: @TODO
-[ConnectionTests.cs]: @TODO
-[RepositoryLocation]: @TODO
-[ZipFileLocation]: @TODO
-[TarGzFileLocation]: @TODO
-[EntityCrudTests.cs]: @TODO
+[GroupTests.cs]: Usergrid.Sdk.IntegrationTests/GroupTests.cs
+[UserManagementTests.cs]: Usergrid.Sdk.IntegrationTests/UserManagementTests.cs
+[ActivitiesTests.cs]: Usergrid.Sdk.IntegrationTests/ActivitiesTests.cs
+[DeviceTests.cs]: Usergrid.Sdk.IntegrationTests/DeviceTests.cs
+[Connection]: Usergrid.Sdk/Model/Connection.cs
+[ConnectionTests.cs]: Usergrid.Sdk.IntegrationTests/ConnectionTests.cs
+[RepositoryLocation]: .
+[ZipFileLocation]: ../../archive/master.zip
+[EntityCrudTests.cs]: Usergrid.Sdk.IntegrationTests/EntityCrudTests.cs
+[EntityPagingTests.cs]: Usergrid.Sdk.IntegrationTests/EntityPagingTests.cs
 
-
-[UsergridNotifier]: @TODO
-[NotificationRecipientsTests]: @TODO
-[NotificationTests.cs]: @TODO
+[UsergridNotifier]: Usergrid.Sdk/Model/UsergridNotifier.cs
+[NotificationRecipientsTests]: Usergrid.Sdk.Tests/Model/NotificationRecipientsTests.cs
+[NotificationTests.cs]: Usergrid.Sdk.IntegrationTests/NotificationTests.cs
 <!---Docs-->
 [PushNotificationsDoc]: http://apigee.com/docs/usergrid/content/push-notifications
-[RegisterYourAppDoc]: @TODO
-[UsergridEntityRrelationshipsDoc]:@TODO
+[RegisterYourAppDoc]: http://apigee.com/docs/app-services/content/register-your-app-apple-apns-or-google-gcm
+[UsergridEntityRelationshipsDoc]: http://apigee.com/docs/app-services/content/entity-relationships
