@@ -17,19 +17,19 @@ Global
 		{0278A0A4-F5E9-41F7-A86E-CD376D3FE5E2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0278A0A4-F5E9-41F7-A86E-CD376D3FE5E2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0278A0A4-F5E9-41F7-A86E-CD376D3FE5E2}.Release|Any CPU.Build.0 = Release|Any CPU
-		{437D108F-528C-4B2A-B399-06CF02DEB08B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{437D108F-528C-4B2A-B399-06CF02DEB08B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{437D108F-528C-4B2A-B399-06CF02DEB08B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{437D108F-528C-4B2A-B399-06CF02DEB08B}.Release|Any CPU.Build.0 = Release|Any CPU
 		{9C25CFBA-1F57-4DF3-B0A1-52D1F90F24E6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{9C25CFBA-1F57-4DF3-B0A1-52D1F90F24E6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9C25CFBA-1F57-4DF3-B0A1-52D1F90F24E6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9C25CFBA-1F57-4DF3-B0A1-52D1F90F24E6}.Release|Any CPU.Build.0 = Release|Any CPU
-	EndGlobalSection
-	GlobalSection(MonoDevelopProperties) = preSolution
-		StartupItem = Usergrid.Sdk.IntegrationTests\Usergrid.Sdk.IntegrationTests.csproj
+		{437D108F-528C-4B2A-B399-06CF02DEB08B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{437D108F-528C-4B2A-B399-06CF02DEB08B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{437D108F-528C-4B2A-B399-06CF02DEB08B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{437D108F-528C-4B2A-B399-06CF02DEB08B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(MonoDevelopProperties) = preSolution
+		StartupItem = Usergrid.Sdk.IntegrationTests\Usergrid.Sdk.IntegrationTests.csproj
 	EndGlobalSection
 EndGlobal
