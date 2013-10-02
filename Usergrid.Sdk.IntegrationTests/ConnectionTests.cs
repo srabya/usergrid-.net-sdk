@@ -180,5 +180,53 @@ namespace Usergrid.Sdk.IntegrationTests {
             connections = client.GetConnections(getConnectionDetails);
             Assert.AreEqual(0, connections.Count);
         }
+
+        [Test]
+        public void ShouldFollowUserViaConnections()
+        {
+            IClient client = InitializeClientAndLogin(AuthType.Organization);
+            DeleteUserIfExists(client, "user1");
+            DeleteUserIfExists(client, "user2");
+            
+            UsergridUser user1 = new UsergridUser { UserName = "user1", Email = "user1@gmail.com" };
+            client.CreateUser(user1);
+            UsergridUser user2 = new UsergridUser { UserName = "user2", Email = "user2@gmail.com" };
+            client.CreateUser(user2);
+            
+            var conn = new Connection();
+            conn.ConnectorIdentifier = "user1";
+            conn.ConnectorCollectionName = "users";
+            conn.ConnecteeIdentifier = "user2";
+            conn.ConnecteeCollectionName = "users";
+            conn.ConnectionName = "following";
+            
+            client.CreateConnection(conn);
+
+            //verify the connections
+            var user1Uuid = client.GetEntities<UsergridUser>("users", limit: 1, query: "select * where username='user1'").First().Uuid;
+            var user2Uuid = client.GetEntities<UsergridUser>("users", limit: 1, query: "select * where username='user2'").First().Uuid;
+
+            //user1 should be following user2
+            IList<UsergridEntity> followingConnections = client.GetConnections(new Connection()
+            {
+                ConnectorCollectionName = "users",
+                ConnectorIdentifier = "user1",
+                ConnectionName = "following"
+            });
+
+            Assert.AreEqual(1, followingConnections.Count);
+            Assert.AreEqual(user2Uuid, followingConnections[0].Uuid);
+
+            //also, user1 should be in the followers connection of user2
+            IList<UsergridEntity> followersConnections = client.GetConnections(new Connection()
+            {
+                ConnectorCollectionName = "users",
+                ConnectorIdentifier = "user2",
+                ConnectionName = "followers"
+            });
+
+            Assert.AreEqual(1, followersConnections.Count);
+            Assert.AreEqual(user1Uuid, followersConnections[0].Uuid);
+        }
     }
 }
