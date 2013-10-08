@@ -18,6 +18,7 @@ The .NET SDK is provided by [Apigee](http://apigee.com) and is available as an o
 
 You can download this package here:
 
+
 * Download as a [zip file][ZipFileLocation]
 
 To find out more about Apigee App Services, see:
@@ -150,6 +151,30 @@ For groups:
 * For more information check the [documentation](http://apigee.com/docs/usergrid/content/user) on groups.
  
 Please see [GroupTests.cs][] and [UserManagementTests.cs][] for integration tests.
+
+#### Creating a User with a password
+UsergridUser class doesn't have a property for a password. Passwords can be initialized when creating a user and stored in the servers, once set you won't be able to get the password if you get user. To be able to create a user with a password, derive a class from UsergridUser and add a password property:
+
+```
+public class MyUsergridUser : UsergridUser
+{
+    [JsonProperty("password")]
+    public string Password { get; set; }
+}
+```
+Then you can create the user as you would normally with the client:
+
+```
+var user = new MyUsergridUser { UserName = "user1", Password = "password1", Email = "user1@apigee.com"};
+_client.CreateUser(user);
+```
+Later, if you want to change the password use the ChangePassword method:
+
+```
+_client.ChangePassword("user1" /*user identifier*/, "password1" /*old password*/, "password2" /*new password*/);
+```
+
+There is an integration test which shows this workflow in [UserManagementTests.cs][].
 
 ## Activities and Feeds
 ```
