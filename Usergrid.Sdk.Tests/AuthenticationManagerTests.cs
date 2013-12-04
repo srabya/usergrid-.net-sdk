@@ -1,7 +1,7 @@
 ﻿using System.Net;
+using System.Net.Http;
 using NSubstitute;
 using NUnit.Framework;
-using RestSharp;
 using Usergrid.Sdk.Model;
 using Usergrid.Sdk.Payload;
 using AuthenticationManager = Usergrid.Sdk.Manager.AuthenticationManager;
@@ -24,9 +24,9 @@ namespace Usergrid.Sdk.Tests
 
             request
                 .Received(1)
-                .ExecuteJsonRequest<LoginResponse>(
+                .ExecuteJsonRequest(
                     Arg.Any<string>(),
-                    Arg.Any<Method>(),
+                    Arg.Any<HttpMethod>(),
                     Arg.Is<ClientIdLoginPayload>(d => d.GrantType == "client_credentials" && d.ClientId == clientLoginId && d.ClientSecret == clientSecret));
         }
 
@@ -43,9 +43,9 @@ namespace Usergrid.Sdk.Tests
 
             request
                 .Received(1)
-                .ExecuteJsonRequest<LoginResponse>(
+                .ExecuteJsonRequest(
                     Arg.Any<string>(),
-                    Arg.Any<Method>(),
+                    Arg.Any<HttpMethod>(),
                     Arg.Is<ClientIdLoginPayload>(d => d.GrantType == "client_credentials" && d.ClientId == clientLoginId && d.ClientSecret == clientSecret));
         }
 
@@ -62,9 +62,9 @@ namespace Usergrid.Sdk.Tests
 
             request
                 .Received(1)
-                .ExecuteJsonRequest<LoginResponse>(
+                .ExecuteJsonRequest(
                     Arg.Any<string>(),
-                    Arg.Any<Method>(),
+                    Arg.Any<HttpMethod>(),
                     Arg.Is<UserLoginPayload>(d => d.GrantType == "password" && d.UserName == clientLoginId && d.Password == clientSecret));
         }
 
@@ -76,7 +76,7 @@ namespace Usergrid.Sdk.Tests
             var authenticationManager = new AuthenticationManager(request);
             authenticationManager.Login(null, null, AuthType.None);
 
-            request.DidNotReceiveWithAnyArgs().ExecuteJsonRequest<LoginResponse>(Arg.Any<string>(), Arg.Any<Method>(), Arg.Any<object>());
+            request.DidNotReceiveWithAnyArgs().ExecuteJsonRequest(Arg.Any<string>(), Arg.Any<HttpMethod>(), Arg.Any<object>());
         }
 
         [Test]
@@ -95,19 +95,19 @@ namespace Usergrid.Sdk.Tests
         }
 
         [Test]
-        public void ShouldTranslateToUserGridErrorAndThrowWhenServiceReturnsBadRequest()
+        public async void ShouldTranslateToUserGridErrorAndThrowWhenServiceReturnsBadRequest()
         {
             const string invalidUsernameOrPassword = "Invalid username or password";
             const string invalidGrant = "invalid_grant";
 
             var restResponseContent = new UsergridError {Description = invalidUsernameOrPassword, Error = invalidGrant};
-            var restResponse = Helpers.SetUpRestResponseWithContent<LoginResponse>(HttpStatusCode.BadRequest, restResponseContent);
+            var restResponse = Helpers.SetUpRestResponseWithContent(HttpStatusCode.BadRequest, restResponseContent);
             var request = Helpers.SetUpUsergridRequestWithRestResponse(restResponse);
 
             var authenticationManager = new AuthenticationManager(request);
             try
             {
-                authenticationManager.Login(null, null, AuthType.Organization);
+                await authenticationManager.Login(null, null, AuthType.Organization);
                 throw new AssertionException("UserGridException was expected to be thrown here");
             }
             catch (UsergridException e)

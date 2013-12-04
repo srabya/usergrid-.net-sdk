@@ -37,7 +37,7 @@ namespace Usergrid.Sdk.Tests.ClientTests
 
         [Test]
         [ExpectedException(ExpectedException = typeof (UsergridException), ExpectedMessage = "Exception message")]
-        public void LoginShouldPassOnTheException()
+        public async void LoginShouldPassOnTheException()
         {
             var authenticationManager = Substitute.For<IAuthenticationManager>();
             authenticationManager
@@ -46,7 +46,7 @@ namespace Usergrid.Sdk.Tests.ClientTests
 
 
             var client = new Client(null, null) {AuthenticationManager = authenticationManager};
-            client.Login(null, null, AuthType.None);
+            await client.Login(null, null, AuthType.None);
         }
     }
 }

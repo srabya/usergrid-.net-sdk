@@ -1,12 +1,13 @@
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Usergrid.Sdk.Model;
 
 namespace Usergrid.Sdk.Manager
 {
     internal interface INotificationsManager
     {
-        void CreateNotifierForApple(string notifierName, string environment, string p12CertificatePath);
-        void CreateNotifierForAndroid(string notifierName, string apiKey);
-		void PublishNotification (IEnumerable<Notification> notification, INotificationRecipients recipients, NotificationSchedulerSettings schedulingSettings = null);
+        Task CreateNotifierForApple(string notifierName, string environment, byte[] p12Certificate);
+        Task CreateNotifierForAndroid(string notifierName, string apiKey);
+		Task PublishNotification (IEnumerable<Notification> notification, INotificationRecipients recipients, NotificationSchedulerSettings schedulingSettings = null);
     }
 }

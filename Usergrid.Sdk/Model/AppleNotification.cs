@@ -1,8 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Dynamic;
-using RestSharp;
-using Usergrid.Sdk.Payload;
 
 namespace Usergrid.Sdk.Model
 {

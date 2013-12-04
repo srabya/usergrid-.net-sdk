@@ -1,5 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using NSubstitute;
+using NSubstitute.Core;
 using NUnit.Framework;
 using Usergrid.Sdk.Manager;
 using Usergrid.Sdk.Model;
@@ -43,30 +46,31 @@ namespace Usergrid.Sdk.Tests.ClientTests
         }
 
         [Test]
-        public void GetConnectionsOfSpecificTypeShouldDelegateToConnectionManagerWithCorrectParameters()
-        {
+        public async void GetConnectionsOfSpecificTypeShouldDelegateToConnectionManagerWithCorrectParameters() {
             var connection = new Connection();
-            var enityList = new List<UsergridEntity>();
+            IList<UsergridEntity> entityList = new List<UsergridEntity>();
 
-            _connectionManager.GetConnections<UsergridEntity>(connection).Returns(enityList);
+            _connectionManager.GetConnections<UsergridEntity>(connection).Returns(delegate(CallInfo info) { return Task.FromResult(entityList); });
+            Task<IList<UsergridEntity>>.FromResult(entityList);
+   
 
-            IList<UsergridEntity> returnedEntityList = _client.GetConnections<UsergridEntity>(connection);
+            IList<UsergridEntity> returnedEntityList = await _client.GetConnections<UsergridEntity>(connection);
 
             _connectionManager.Received(1).GetConnections<UsergridEntity>(connection);
-            Assert.AreEqual(enityList, returnedEntityList);
+            Assert.AreEqual(entityList, returnedEntityList);
         }
 
         [Test]
-        public void GetConnectionsShouldDelegateToConnectionManagerWithCorrectParameters()
+        public async void GetConnectionsShouldDelegateToConnectionManagerWithCorrectParameters()
         {
             var connection = new Connection();
-            var enityList = new List<UsergridEntity>();
-            _connectionManager.GetConnections(connection).Returns(enityList);
+            IList<UsergridEntity> entityList = new List<UsergridEntity>();
+            _connectionManager.GetConnections(connection).Returns(delegate(CallInfo info) { return Task.FromResult(entityList); });
 
-            IList<UsergridEntity> returnedEntityList = _client.GetConnections(connection);
+            IList<UsergridEntity> returnedEntityList = await _client.GetConnections(connection);
 
             _connectionManager.Received(1).GetConnections(connection);
-            Assert.AreEqual(enityList, returnedEntityList);
+            Assert.AreEqual(entityList, returnedEntityList);
         }
     }
 }

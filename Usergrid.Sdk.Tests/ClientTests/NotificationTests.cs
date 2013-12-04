@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using NSubstitute;
 using NUnit.Framework;
 using Usergrid.Sdk.Manager;
@@ -44,32 +45,33 @@ namespace Usergrid.Sdk.Tests.ClientTests
 
         [Test]
         [ExpectedException(ExpectedException = typeof (UsergridException), ExpectedMessage = "Exception message")]
-        public void CreateNotifierForAndroidShouldPassOnTheException()
+        public async void CreateNotifierForAndroidShouldPassOnTheException()
         {
             _notificationsManager
                 .When(m => m.CreateNotifierForAndroid(Arg.Any<string>(), Arg.Any<string>()))
                 .Do(m => { throw new UsergridException(new UsergridError {Description = "Exception message"}); });
 
-            _client.CreateNotifierForAndroid(null, null);
+            await _client.CreateNotifierForAndroid(null, null);
         }
 
         [Test]
         public void CreateNotifierForAppleShouldDelegateToNotificationsManager()
         {
-            _client.CreateNotifierForApple("notifierName", "development", "certificateFilePath");
+            var p12Certificate = new byte[0];
+            _client.CreateNotifierForApple("notifierName", "development", p12Certificate);
 
-            _notificationsManager.Received(1).CreateNotifierForApple("notifierName", "development", "certificateFilePath");
+            _notificationsManager.Received(1).CreateNotifierForApple("notifierName", "development", p12Certificate);
         }
 
         [Test]
         [ExpectedException(ExpectedException = typeof (UsergridException), ExpectedMessage = "Exception message")]
-        public void CreateNotifierForAppleShouldPassOnTheException()
+        public async void CreateNotifierForAppleShouldPassOnTheException()
         {
             _notificationsManager
-                .When(m => m.CreateNotifierForApple(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>()))
+                .When(m => m.CreateNotifierForApple(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<byte[]>()))
                 .Do(m => { throw new UsergridException(new UsergridError {Description = "Exception message"}); });
 
-            _client.CreateNotifierForApple(null, null, null);
+            await _client.CreateNotifierForApple(null, null, null);
         }
 
         [Test]
@@ -90,31 +92,33 @@ namespace Usergrid.Sdk.Tests.ClientTests
 
         [Test]
         [ExpectedException(ExpectedException = typeof (UsergridException), ExpectedMessage = "Exception message")]
-        public void GetNotifierShouldPassOnTheException()
+        public async void GetNotifierShouldPassOnTheException()
         {
             _entityManager
                 .When(m => m.GetEntity<UsergridNotifier>(Arg.Any<string>(), Arg.Any<string>()))
                 .Do(m => { throw new UsergridException(new UsergridError {Description = "Exception message"}); });
 
-            _client.GetNotifier<UsergridNotifier>(null);
+            await _client.GetNotifier<UsergridNotifier>(null);
         }
 
         [Test]
-        public void GetNotifierShouldReturnNullForUnexistingNotifier()
+        public async void GetNotifierShouldReturnNullForUnexistingNotifier()
         {
-            _entityManager.GetEntity<UsergridNotifier>("/notifiers", "notifierIdentifier").Returns(x => null);
+            UsergridNotifier entity = null;
 
-            var returnedEntity = _client.GetNotifier<UsergridNotifier>("notifierIdentifier");
+            _entityManager.GetEntity<UsergridNotifier>("/notifiers", "notifierIdentifier").Returns(x => Task.FromResult(entity));
+
+            var returnedEntity = await _client.GetNotifier<UsergridNotifier>("notifierIdentifier");
 
             Assert.IsNull(returnedEntity);
         }
 
         [Test]
-        public void GetNotifierShouldReturnUsergridNotifierFromEntityManager() {
+        public async void GetNotifierShouldReturnUsergridNotifierFromEntityManager() {
             var entity = new UsergridNotifier();
-            _entityManager.GetEntity<UsergridNotifier>("/notifiers", "notifierIdentifier").Returns(x => entity);
+            _entityManager.GetEntity<UsergridNotifier>("/notifiers", "notifierIdentifier").Returns(x => Task.FromResult(entity));
 
-            var returnedEntity = _client.GetNotifier<UsergridNotifier>("notifierIdentifier");
+            var returnedEntity = await _client.GetNotifier<UsergridNotifier>("notifierIdentifier");
 
             Assert.AreEqual(entity, returnedEntity);
         }

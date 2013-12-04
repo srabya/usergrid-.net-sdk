@@ -1,7 +1,5 @@
-using System.Collections.Generic;
 using System.Net;
 using Newtonsoft.Json;
-using RestSharp;
 using Usergrid.Sdk.Model;
 
 namespace Usergrid.Sdk.Manager

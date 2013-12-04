@@ -2,9 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
+using System.Threading.Tasks;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using RestSharp;
 using Usergrid.Sdk.Model;
 using Usergrid.Sdk.Payload;
 
@@ -15,28 +15,28 @@ namespace Usergrid.Sdk.Manager {
 
         internal EntityManager(IUsergridRequest request) : base(request) {}
 
-        public T CreateEntity<T>(string collection, T entity) {
-            IRestResponse response = Request.ExecuteJsonRequest("/" + collection, Method.POST, entity);
+        public async Task<T> CreateEntity<T>(string collection, T entity) {
+            IRestResponse response = await Request.ExecuteJsonRequest("/" + collection, HttpMethod.Post, entity);
             ValidateResponse(response);
             var returnedEntity = JsonConvert.DeserializeObject<UsergridGetResponse<T>>(response.Content);
 
             return returnedEntity.Entities.FirstOrDefault();
         }
 
-        public void DeleteEntity(string collection, string identifer) {
-            IRestResponse response = Request.ExecuteJsonRequest(string.Format("/{0}/{1}", collection, identifer), Method.DELETE);
+        public async Task DeleteEntity(string collection, string identifer) {
+            IRestResponse response = await Request.ExecuteJsonRequest(string.Format("/{0}/{1}", collection, identifer), HttpMethod.Delete);
             ValidateResponse(response);
         }
 
-        public void UpdateEntity<T>(string collection, string identifer, T entity) {
-            IRestResponse response = Request.ExecuteJsonRequest(string.Format("/{0}/{1}", collection, identifer), Method.PUT, entity);
+        public async Task UpdateEntity<T>(string collection, string identifer, T entity) {
+            IRestResponse response = await Request.ExecuteJsonRequest(string.Format("/{0}/{1}", collection, identifer), HttpMethod.Put, entity);
             ValidateResponse(response);
         }
 
-        public T GetEntity<T>(string collectionName, string identifer) {
-            IRestResponse response = Request.ExecuteJsonRequest(string.Format("/{0}/{1}", collectionName, identifer), Method.GET);
+        public async Task<T> GetEntity<T>(string collectionName, string identifer) {
+            IRestResponse response = await Request.ExecuteJsonRequest(string.Format("/{0}/{1}", collectionName, identifer), HttpMethod.Get);
 
-            if (response.StatusCode == HttpStatusCode.NotFound)
+            if (response.StatusCode == HttpStatusCode.NotFound || (response.StatusCode == HttpStatusCode.Unauthorized && response.Content.Contains("not_found")))
                 return default(T);
             ValidateResponse(response);
 
@@ -45,7 +45,7 @@ namespace Usergrid.Sdk.Manager {
             return entity.Entities.FirstOrDefault();
         }
 
-        public UsergridCollection<T> GetEntities<T>(string collectionName, int limit = 10, string query = null) {
+        public async Task<UsergridCollection<T>> GetEntities<T>(string collectionName, int limit = 10, string query = null) {
             _pageSizes.Remove(typeof (T));
             _pageSizes.Add(typeof (T), limit);
 
@@ -53,7 +53,7 @@ namespace Usergrid.Sdk.Manager {
             if (query != null)
                 url += "&query=" + query;
 
-            IRestResponse response = Request.ExecuteJsonRequest(url, Method.GET);
+            IRestResponse response = await Request.ExecuteJsonRequest(url, HttpMethod.Get);
 
             if (response.StatusCode == HttpStatusCode.NotFound)
                 return new UsergridCollection<T>();
@@ -74,7 +74,7 @@ namespace Usergrid.Sdk.Manager {
             return collection;
         }
 
-        public UsergridCollection<T> GetNextEntities<T>(string collectionName, string query = null) {
+        public async Task<UsergridCollection<T>> GetNextEntities<T>(string collectionName, string query = null) {
             if (!_cursorStates.ContainsKey(typeof (T))) {
                 return new UsergridCollection<T>();
             }
@@ -92,7 +92,7 @@ namespace Usergrid.Sdk.Manager {
             if (query != null)
                 url += "&query=" + query;
 
-            IRestResponse response = Request.ExecuteJsonRequest(url, Method.GET);
+            IRestResponse response = await Request.ExecuteJsonRequest(url, HttpMethod.Get);
 
             if (response.StatusCode == HttpStatusCode.NotFound)
                 return new UsergridCollection<T>();
@@ -115,7 +115,7 @@ namespace Usergrid.Sdk.Manager {
             return collection;
         }
 
-        public UsergridCollection<T> GetPreviousEntities<T>(string collectionName, string query = null) {
+        public async Task<UsergridCollection<T>> GetPreviousEntities<T>(string collectionName, string query = null) {
             if (!_cursorStates.ContainsKey(typeof (T))) {
                 var error = new UsergridError
                     {
@@ -133,14 +133,14 @@ namespace Usergrid.Sdk.Manager {
             int limit = _pageSizes[typeof (T)];
 
             if (cursor == null) {
-                return GetEntities<T>(collectionName, limit);
+                return await GetEntities<T>(collectionName, limit);
             }
 
             string url = string.Format("/{0}?cursor={1}&limit={2}", collectionName, cursor, limit);
             if (query != null)
                 url += "&query=" + query;
 
-            IRestResponse response = Request.ExecuteJsonRequest(url, Method.GET);
+            IRestResponse response = await Request.ExecuteJsonRequest(url, HttpMethod.Get);
 
             if (response.StatusCode == HttpStatusCode.NotFound)
                 return new UsergridCollection<T>();

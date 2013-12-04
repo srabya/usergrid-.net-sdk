@@ -6,27 +6,24 @@ namespace Usergrid.Sdk.IntegrationTests {
     [TestFixture]
     public class EntityCrudTests : BaseTest {
         private IClient _client;
-        [SetUp]
-        public void Setup() {
-            _client = InitializeClientAndLogin(AuthType.Organization);
-        }
 
         [Test]
-        public void ShouldCrudPocoEntity() {
-            const string collectionName = "friends";
+        public async void ShouldCrudPocoEntity() {
+            _client = await InitializeClientAndLogin(AuthType.Organization);
+            const string collectionName = "newfriends";
             var friend = new Friend
                 {
                     Name = "EntityName",
                     Age = 25
                 };
 
-            DeleteEntityIfExists<Friend>(_client, collectionName, friend.Name);
+            await DeleteEntityIfExists<Friend>(_client, collectionName, friend.Name);
 
             // Create a new entity
-            _client.CreateEntity(collectionName, friend);
+            await _client.CreateEntity(collectionName, friend);
 
             // Get it back
-            var friendFromUsergrid = _client.GetEntity<Friend>(collectionName, friend.Name);
+            var friendFromUsergrid = await _client.GetEntity<Friend>(collectionName, friend.Name);
 
             // Assert that the entity returned is correct
             Assert.IsNotNull(friendFromUsergrid);
@@ -35,7 +32,7 @@ namespace Usergrid.Sdk.IntegrationTests {
 
             // Get it back with query
             string query = "select * where name = '" + friend.Name + "'";
-            UsergridCollection<Friend> friends = _client.GetEntities<Friend>(collectionName, query: query);
+            UsergridCollection<Friend> friends = await _client.GetEntities<Friend>(collectionName, query: query);
 
             // Assert the collection is correct
             Assert.IsNotNull(friends);
@@ -51,40 +48,41 @@ namespace Usergrid.Sdk.IntegrationTests {
             // Update the entity
             Friend friendToUpdate = friendFromUsergrid;
             friendToUpdate.Age = 30;
-            _client.UpdateEntity(collectionName, friendToUpdate.Name, friendToUpdate);
+            await _client.UpdateEntity(collectionName, friendToUpdate.Name, friendToUpdate);
 
             // Get it back
-            friendFromUsergrid = _client.GetEntity<Friend>(collectionName, friendToUpdate.Name);
+            friendFromUsergrid = await _client.GetEntity<Friend>(collectionName, friendToUpdate.Name);
 
             // Assert that entity is updated
             Assert.AreEqual(friendToUpdate.Age, friendFromUsergrid.Age);
 
             // Delete the entity
-            _client.DeleteEntity(collectionName, friend.Name);
+            await _client.DeleteEntity(collectionName, friend.Name);
 
             // Get it back
-            friendFromUsergrid = _client.GetEntity<Friend>(collectionName, friend.Name);
+            friendFromUsergrid = await _client.GetEntity<Friend>(collectionName, friend.Name);
 
             // Assert that it doesn't exist
             Assert.IsNull(friendFromUsergrid);
         }
 
         [Test]
-        public void ShouldCrudUserGridEntity() {
-            const string collectionName = "friends";
+        public async void ShouldCrudUserGridEntity() {
+            _client = await InitializeClientAndLogin(AuthType.Organization);
+            const string collectionName = "newfriends";
             var friend = new UsergridFriend
                 {
                     Name = "EntityName",
                     Age = 25
                 };
 
-            DeleteEntityIfExists<Friend>(_client, collectionName, friend.Name);
+            await DeleteEntityIfExists<Friend>(_client, collectionName, friend.Name);
 
             // Create a new entity
-            _client.CreateEntity(collectionName, friend);
+            await _client.CreateEntity(collectionName, friend);
 
             // Get it back
-            var friendFromUsergrid = _client.GetEntity<UsergridFriend>(collectionName, friend.Name);
+            var friendFromUsergrid = await _client.GetEntity<UsergridFriend>(collectionName, friend.Name);
 
             // Assert that the entity returned is correct
             Assert.IsNotNull(friendFromUsergrid);
@@ -97,7 +95,7 @@ namespace Usergrid.Sdk.IntegrationTests {
 
             // Get it back with query
             string query = "select * where name = '" + friend.Name + "'";
-            UsergridCollection<UsergridFriend> friends = _client.GetEntities<UsergridFriend>(collectionName, query: query);
+            UsergridCollection<UsergridFriend> friends = await _client.GetEntities<UsergridFriend>(collectionName, query: query);
 
             // Assert the collection is correct
             Assert.IsNotNull(friends);
@@ -117,19 +115,19 @@ namespace Usergrid.Sdk.IntegrationTests {
             // Update the entity
             UsergridFriend friendToUpdate = friendFromUsergrid;
             friendToUpdate.Age = 30;
-            _client.UpdateEntity(collectionName, friendToUpdate.Name, friendToUpdate);
+            await _client.UpdateEntity(collectionName, friendToUpdate.Name, friendToUpdate);
 
             // Get it back
-            friendFromUsergrid = _client.GetEntity<UsergridFriend>(collectionName, friendToUpdate.Name);
+            friendFromUsergrid = await _client.GetEntity<UsergridFriend>(collectionName, friendToUpdate.Name);
 
             // Assert that entity is updated
             Assert.AreEqual(friendToUpdate.Age, friendFromUsergrid.Age);
 
             // Delete the entity
-            _client.DeleteEntity(collectionName, friend.Name);
+            await _client.DeleteEntity(collectionName, friend.Name);
 
             // Get it back
-            friendFromUsergrid = _client.GetEntity<UsergridFriend>(collectionName, friend.Name);
+            friendFromUsergrid = await _client.GetEntity<UsergridFriend>(collectionName, friend.Name);
 
             // Assert that it doesn't exist
             Assert.IsNull(friendFromUsergrid);

@@ -1,4 +1,5 @@
-﻿using NSubstitute;
+﻿using System.Threading.Tasks;
+using NSubstitute;
 using NUnit.Framework;
 using Usergrid.Sdk.Manager;
 using Usergrid.Sdk.Model;
@@ -35,22 +36,22 @@ namespace Usergrid.Sdk.Tests.ClientTests
 
         [Test]
         [ExpectedException(ExpectedException = typeof (UsergridException), ExpectedMessage = "Exception message")]
-        public void CreateEntityShouldPassOnTheException()
+        public async void CreateEntityShouldPassOnTheException()
         {
             _entityManager
                 .When(m => m.CreateEntity(Arg.Any<string>(), Arg.Any<object>()))
                 .Do(m => { throw new UsergridException(new UsergridError {Description = "Exception message"}); });
 
-            _client.CreateEntity<object>(null, null);
+            await _client.CreateEntity<object>(null, null);
         }
 
         [Test]
-        public void CreateEntityShouldReturnUserGridEntity()
+        public async void CreateEntityShouldReturnUserGridEntity()
         {
             var entity = new object();
-            _entityManager.CreateEntity("collection", entity).ReturnsForAnyArgs(entity);
+            _entityManager.CreateEntity("collection", entity).ReturnsForAnyArgs(Task.FromResult(entity));
 
-            var returnedEntity = _client.CreateEntity("collection", entity);
+            var returnedEntity = await _client.CreateEntity("collection", entity);
 
             Assert.AreEqual(entity, returnedEntity);
         }
@@ -65,13 +66,13 @@ namespace Usergrid.Sdk.Tests.ClientTests
 
         [Test]
         [ExpectedException(ExpectedException = typeof (UsergridException), ExpectedMessage = "Exception message")]
-        public void DeleteEntityShouldPassOnTheException()
+        public async void DeleteEntityShouldPassOnTheException()
         {
             _entityManager
                 .When(m => m.DeleteEntity(Arg.Any<string>(), Arg.Any<string>()))
                 .Do(m => { throw new UsergridException(new UsergridError {Description = "Exception message"}); });
 
-            _client.DeleteEntity(null, null);
+            await _client.DeleteEntity(null, null);
         }
 
         [Test]
@@ -108,32 +109,32 @@ namespace Usergrid.Sdk.Tests.ClientTests
 
         [Test]
         [ExpectedException(ExpectedException = typeof (UsergridException), ExpectedMessage = "Exception message")]
-        public void GetEntityShouldPassOnTheException()
+        public async void GetEntityShouldPassOnTheException()
         {
             _entityManager
                 .When(m => m.GetEntity<object>(Arg.Any<string>(), Arg.Any<string>()))
                 .Do(m => { throw new UsergridException(new UsergridError {Description = "Exception message"}); });
 
-            _client.GetEntity<object>(null, null);
+            await _client.GetEntity<object>(null, null);
         }
 
         [Test]
-        public void GetEntityShouldReturnEntityFromEntityManager()
+        public async void GetEntityShouldReturnEntityFromEntityManager()
         {
             var entity = new object();
-            _entityManager.GetEntity<object>("collection", "identifier").ReturnsForAnyArgs(entity);
+            _entityManager.GetEntity<object>("collection", "identifier").ReturnsForAnyArgs(Task.FromResult(entity));
 
-            object createdEntity = _client.GetEntity<object>("collection", "identifier");
+            object createdEntity = await _client.GetEntity<object>("collection", "identifier");
 
             Assert.AreEqual(entity, createdEntity);
         }
 
         [Test]
-        public void GetEntityShouldReturnNullForUnexistingEntity()
-        {
-            _entityManager.GetEntity<UsergridEntity>("collection", "identifier").Returns(x => null);
+        public async void GetEntityShouldReturnNullForUnexistingEntity() {
+            UsergridEntity entity = null;
+            _entityManager.GetEntity<UsergridEntity>("collection", "identifier").Returns(x => Task.FromResult(entity));
 
-            var usergridEntity = _client.GetEntity<UsergridDevice>("collection", "identifier");
+            var usergridEntity = await _client.GetEntity<UsergridDevice>("collection", "identifier");
 
             Assert.IsNull(usergridEntity);
         }
@@ -182,13 +183,13 @@ namespace Usergrid.Sdk.Tests.ClientTests
 
         [Test]
         [ExpectedException(ExpectedException = typeof (UsergridException), ExpectedMessage = "Exception message")]
-        public void UpdateEntityShouldPassOnTheException()
+        public async void UpdateEntityShouldPassOnTheException()
         {
             _entityManager
                 .When(m => m.UpdateEntity(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<object>()))
                 .Do(m => { throw new UsergridException(new UsergridError {Description = "Exception message"}); });
 
-            _client.UpdateEntity<object>(null, null, null);
+            await _client.UpdateEntity<object>(null, null, null);
         }
     }
 }

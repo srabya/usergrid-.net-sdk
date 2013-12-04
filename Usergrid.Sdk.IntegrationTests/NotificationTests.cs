@@ -1,40 +1,66 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using NUnit.Framework;
 using Usergrid.Sdk.Model;
 
-namespace Usergrid.Sdk.IntegrationTests
-{
+namespace Usergrid.Sdk.IntegrationTests {
     [TestFixture]
-    public class NotificationTests : BaseTest
-    {
+    public class NotificationTests : BaseTest {
+        private static async void CreateUser(string username, IClient client) {
+            var userEntity = new MyUsergridUser {UserName = username};
+            // See if this user exists
+            var userFromUsergrid = await client.GetUser<UsergridUser>(username);
+            // Delete if exists
+            if (userFromUsergrid != null) {
+                await client.DeleteUser(username);
+            }
+            // Now create the user
+            await client.CreateUser(userEntity);
+        }
+
+
+        private async Task CreateAppleNotifier(IClient client, string notifierName) {
+            await DeleteNotifierIfExists(client, notifierName);
+            await client.CreateNotifierForApple(notifierName, "development", File.ReadAllBytes(P12CertificatePath));
+        }
+
+        private async Task CreateAndroidNotifier(IClient client, string notifierName) {
+            await DeleteNotifierIfExists(client, notifierName);
+            await client.CreateNotifierForAndroid(notifierName, GoogleApiKey);
+        }
+
+        private static async Task DeleteNotifierIfExists(IClient client, string notifierName) {
+            var usergridNotifier = await client.GetNotifier<UsergridNotifier>(notifierName);
+            if (usergridNotifier != null)
+                await client.DeleteNotifier(usergridNotifier.Uuid);
+        }
+
         [Test]
-        public void ShouldCreateNotifierForAndroid()
-        {
-            const string notifierName = "test_notifier";
-            var client = InitializeClientAndLogin(AuthType.Organization);
-            DeleteNotifierIfExists(client, notifierName);
+        public async void ShouldCreateNotifierForAndroid() {
+            const string notifierName = "test_notifier_new";
+            IClient client = await InitializeClientAndLogin(AuthType.Organization);
+            await DeleteNotifierIfExists(client, notifierName);
 
-            client.CreateNotifierForAndroid(notifierName, GoogleApiKey /*e.g. AIzaSyCkXOtBQ7A9GoJsSLqZlod_YjEfxxxxxxx*/);
+            await client.CreateNotifierForAndroid(notifierName, GoogleApiKey /*e.g. AIzaSyCkXOtBQ7A9GoJsSLqZlod_YjEfxxxxxxx*/);
 
-            UsergridNotifier usergridNotifier = client.GetNotifier<UsergridNotifier>(notifierName);
+            UsergridNotifier usergridNotifier = await client.GetNotifier<UsergridNotifier>(notifierName);
             Assert.That(usergridNotifier, Is.Not.Null);
             Assert.That(usergridNotifier.Provider, Is.EqualTo("google"));
             Assert.That(usergridNotifier.Name, Is.EqualTo(notifierName));
         }
 
         [Test]
-        public void ShouldCreateNotifierForApple()
-        {
+        public async void ShouldCreateNotifierForApple() {
             const string notifierName = "test_notifier";
             const string environment = "development";
-            var client = InitializeClientAndLogin(AuthType.Organization);
-            DeleteNotifierIfExists(client, notifierName);
+            IClient client = await InitializeClientAndLogin(AuthType.Organization);
+            await DeleteNotifierIfExists(client, notifierName);
 
-            client.CreateNotifierForApple(notifierName, environment, P12CertificatePath /*e.g. c:\temp\pushtest_dev.p12*/);
+            await client.CreateNotifierForApple(notifierName, environment, File.ReadAllBytes(P12CertificatePath));
 
-            UsergridNotifier usergridNotifier = client.GetNotifier<UsergridNotifier>(notifierName);
+            UsergridNotifier usergridNotifier = await client.GetNotifier<UsergridNotifier>(notifierName);
 
             Assert.That(usergridNotifier, Is.Not.Null);
             Assert.That(usergridNotifier.Environment, Is.EqualTo(environment));
@@ -43,8 +69,7 @@ namespace Usergrid.Sdk.IntegrationTests
         }
 
         [Test]
-        public void ShouldPublishNotifications()
-        {
+        public async void ShouldPublishNotifications() {
             //Set up
             const string appleNotifierName = "apple_notifier";
             const string googleNotifierName = "google_notifier";
@@ -52,9 +77,9 @@ namespace Usergrid.Sdk.IntegrationTests
             const string appleTestMessge = "test message for Apple";
             const string androidTestMessage = "test message for Android";
 
-            var client = InitializeClientAndLogin(AuthType.Organization);
-            CreateAppleNotifier(client,appleNotifierName);            
-            CreateAndroidNotifier(client,googleNotifierName);            
+            IClient client = await InitializeClientAndLogin(AuthType.Organization);
+            await CreateAppleNotifier(client, appleNotifierName);
+            await CreateAndroidNotifier(client, googleNotifierName);
             CreateUser(username, client);
 
             //Setup Notifications
@@ -64,10 +89,10 @@ namespace Usergrid.Sdk.IntegrationTests
             INotificationRecipients recipients = new NotificationRecipients().AddUserWithName(username);
             var schedulerSettings = new NotificationSchedulerSettings {DeliverAt = DateTime.Now.AddDays(1)};
 
-            client.PublishNotification(new Notification[] {appleNotification, googleNotification}, recipients, schedulerSettings);
+            await client.PublishNotification(new Notification[] {appleNotification, googleNotification}, recipients, schedulerSettings);
 
             //Assert
-            UsergridCollection<dynamic> entities = client.GetEntities<dynamic>("notifications", query: "order by created desc");
+            UsergridCollection<dynamic> entities = await client.GetEntities<dynamic>("notifications", query: "order by created desc");
             dynamic notification = entities.FirstOrDefault();
 
             Assert.IsNotNull(notification);
@@ -77,42 +102,9 @@ namespace Usergrid.Sdk.IntegrationTests
             Assert.AreEqual(androidTestMessage, notification.payloads.google_notifier.data.Value);
 
             //Cancel notification and assert it is canceled
-            client.CancelNotification(notification.uuid.Value);
-            dynamic entity = client.GetEntity<dynamic>("notifications", notification.uuid.Value);
+            await (Task) client.CancelNotification(notification.uuid.Value);
+            dynamic entity = await (Task<dynamic>) client.GetEntity<dynamic>("notifications", notification.uuid.Value);
             Assert.AreEqual(entity.state.Value, "CANCELED");
         }
-
-        private static void CreateUser(string username, IClient client)
-        {
-            var userEntity = new MyUsergridUser {UserName = username};
-            // See if this user exists
-            var userFromUsergrid = client.GetUser<UsergridUser>(username);
-            // Delete if exists
-            if (userFromUsergrid != null) {
-                client.DeleteUser(username);
-            }
-            // Now create the user
-            client.CreateUser(userEntity);
-        }
-
-
-        private void CreateAppleNotifier(IClient client, string notifierName)
-        {
-            DeleteNotifierIfExists(client, notifierName);
-            client.CreateNotifierForApple(notifierName, "development", base.P12CertificatePath);
-        }
-
-        private void CreateAndroidNotifier(IClient client, string notifierName)
-        {
-            DeleteNotifierIfExists(client, notifierName);
-            client.CreateNotifierForAndroid(notifierName, GoogleApiKey);
-        }
-        private static void DeleteNotifierIfExists(IClient client, string notifierName)
-        {
-            var usergridNotifier = client.GetNotifier<UsergridNotifier>(notifierName);
-            if (usergridNotifier != null)
-                client.DeleteNotifier(usergridNotifier.Uuid);
-        }
-
     }
 }

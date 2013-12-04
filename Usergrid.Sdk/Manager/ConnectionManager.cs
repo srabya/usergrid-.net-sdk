@@ -1,7 +1,8 @@
 using System.Collections.Generic;
 using System.Net;
+using System.Net.Http;
+using System.Threading.Tasks;
 using Newtonsoft.Json;
-using RestSharp;
 using Usergrid.Sdk.Model;
 using Usergrid.Sdk.Payload;
 
@@ -13,27 +14,27 @@ namespace Usergrid.Sdk.Manager
         {
         }
 
-        public void CreateConnection(Connection connection) 
+        public async Task CreateConnection(Connection connection) 
         {
             // e.g. /user/fred/following/user/barney
-            IRestResponse response = Request.ExecuteJsonRequest(string.Format(
+            IRestResponse response = await Request.ExecuteJsonRequest(string.Format(
                 "/{0}/{1}/{2}/{3}/{4}",
                 connection.ConnectorCollectionName,
                 connection.ConnectorIdentifier,
                 connection.ConnectionName,
                 connection.ConnecteeCollectionName,
-                connection.ConnecteeIdentifier), Method.POST);
+                connection.ConnecteeIdentifier), HttpMethod.Post);
 
             ValidateResponse(response);
         }
 
-        public IList<UsergridEntity> GetConnections(Connection connection) 
+        public async Task<IList<UsergridEntity>> GetConnections(Connection connection) 
         {
             // e.g. /user/fred/following
-            IRestResponse response = Request.ExecuteJsonRequest(string.Format("/{0}/{1}/{2}",
+            IRestResponse response = await Request.ExecuteJsonRequest(string.Format("/{0}/{1}/{2}",
                                                                               connection.ConnectorCollectionName,
                                                                               connection.ConnectorIdentifier,
-                                                                              connection.ConnectionName), Method.GET);
+                                                                              connection.ConnectionName), HttpMethod.Get);
 
             if (response.StatusCode == HttpStatusCode.NotFound)
             {
@@ -47,14 +48,14 @@ namespace Usergrid.Sdk.Manager
             return entity.Entities;
         }
 
-        public IList<TConnectee> GetConnections<TConnectee>(Connection connection) 
+        public async Task<IList<TConnectee>> GetConnections<TConnectee>(Connection connection) 
         {
             // e.g. /user/fred/following/user
-            IRestResponse response = Request.ExecuteJsonRequest(string.Format("/{0}/{1}/{2}/{3}",
+            IRestResponse response = await Request.ExecuteJsonRequest(string.Format("/{0}/{1}/{2}/{3}",
                                                                               connection.ConnectorCollectionName,
                                                                               connection.ConnectorIdentifier, 
                                                                               connection.ConnectionName,
-                                                                              connection.ConnecteeCollectionName), Method.GET);
+                                                                              connection.ConnecteeCollectionName), HttpMethod.Get);
 
             if (response.StatusCode == HttpStatusCode.NotFound)
             {
@@ -68,15 +69,15 @@ namespace Usergrid.Sdk.Manager
             return entity.Entities;
         }
 
-        public void DeleteConnection(Connection connection)
+        public async Task DeleteConnection(Connection connection)
         {
-            IRestResponse response = Request.ExecuteJsonRequest(string.Format(
+            IRestResponse response = await Request.ExecuteJsonRequest(string.Format(
                 "/{0}/{1}/{2}/{3}/{4}",
                 connection.ConnectorCollectionName,
                 connection.ConnectorIdentifier,
                 connection.ConnectionName,
                 connection.ConnecteeCollectionName,
-                connection.ConnecteeIdentifier), Method.DELETE);
+                connection.ConnecteeIdentifier), HttpMethod.Delete);
 
             ValidateResponse(response);
         }

@@ -1,5 +1,11 @@
-﻿using System.Collections.Generic;
-using RestSharp;
+﻿using System;
+using System.Collections.Generic;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Threading.Tasks;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
+using Usergrid.Sdk.Manager;
 
 namespace Usergrid.Sdk
 {
@@ -7,70 +13,46 @@ namespace Usergrid.Sdk
     {
         private readonly string _application;
         private readonly string _organization;
-        private readonly IRestClient _restClient;
+        private readonly HttpClient _restClient;
 
-        public UsergridRequest(string baseUri, string organization, string application, IRestClient restClient = null)
+        public UsergridRequest(string baseUri, string organization, string application, HttpClient restClient = null)
         {
             _organization = organization;
             _application = application;
-            _restClient = restClient ?? new RestClient(baseUri);
+            _restClient = restClient ?? new HttpClient();
+            _restClient.BaseAddress = new Uri(baseUri);
         }
 
         public string AccessToken { get; set; }
 
-        public IRestResponse<T> ExecuteJsonRequest<T>(string resource, Method method, object body = null) where T : new()
+        public async Task<IRestResponse> ExecuteJsonRequest(string resource, HttpMethod method, object body = null)
         {
-            RestRequest request = GetRequest(resource, method);
+            HttpRequestMessage request = GetRequest(resource, method);
             AddBodyAsJson(body, request);
-            IRestResponse<T> response = _restClient.Execute<T>(request);
-            return response;
+            HttpResponseMessage response = await _restClient.SendAsync(request);
+            return new RestResponse(await response.Content.ReadAsStringAsync(), response);
         }
 
-        public IRestResponse ExecuteJsonRequest(string resource, Method method, object body = null)
+        private HttpRequestMessage GetRequest(string resource, HttpMethod method)
         {
-            RestRequest request = GetRequest(resource, method);
-            AddBodyAsJson(body, request);
-            IRestResponse response = _restClient.Execute(request);
-            return response;
-        }
-
-        public IRestResponse ExecuteMultipartFormDataRequest(string resource, Method method, IDictionary<string, object> formParameters, IDictionary<string, string> fileParameters)
-        {
-            RestRequest request = GetRequest(resource, method);
-            foreach (var parameter in formParameters)
-            {
-                request.AddParameter(parameter.Key, parameter.Value, ParameterType.GetOrPost);
-            }
-            foreach (var parameter in fileParameters)
-            {
-                request.AddFile(parameter.Key, parameter.Value);
-            }
-
-            IRestResponse response = _restClient.Execute(request);
-            return response;
-        }
-
-        private RestRequest GetRequest(string resource, Method method)
-        {
-            var request = new RestRequest(string.Format("{0}/{1}{2}", _organization, _application, resource), method);
+            var request = new HttpRequestMessage(method,  string.Format("{0}/{1}{2}", _organization, _application, resource));
             AddAuthorizationHeader(request);
             return request;
         }
 
-        private static void AddBodyAsJson(object body, RestRequest request)
+        private static void AddBodyAsJson(object body, HttpRequestMessage request)
         {
-            if (body != null)
-            {
-                request.JsonSerializer = new RestSharpJsonSerializer();
-                request.RequestFormat = DataFormat.Json;
-                request.AddBody(body);
+            if (body != null) {
+                var content = JsonConvert.SerializeObject(body, new JsonSerializerSettings {ContractResolver = new CamelCasePropertyNamesContractResolver()});
+                request.Content = new StringContent(content);
+                request.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
             }
         }
 
-        private void AddAuthorizationHeader(RestRequest request)
+        private void AddAuthorizationHeader(HttpRequestMessage request)
         {
             if (AccessToken != null)
-                request.AddHeader("Authorization", string.Format("Bearer {0}", AccessToken));
+                request.Headers.Add("Authorization", string.Format("Bearer {0}", AccessToken));
         }
     }
 }

@@ -1,9 +1,11 @@
 using System.Collections.Generic;
 using System.Net;
+using System.Net.Http;
+using System.Threading.Tasks;
 using NSubstitute;
 using NUnit.Framework;
-using RestSharp;
 using Usergrid.Sdk.Model;
+using Usergrid.Sdk.Payload;
 
 namespace Usergrid.Sdk.Tests
 {
@@ -14,12 +16,12 @@ namespace Usergrid.Sdk.Tests
         public void ShouldGetToCorrectEndPoint()
         {
             var restResponseContent = new UsergridGetResponse<Friend> { Entities = new List<Friend>(), Cursor = "" };
-            IRestResponse<UsergridGetResponse<Friend>> restResponse = Helpers.SetUpRestResponseWithContent<UsergridGetResponse<Friend>>(HttpStatusCode.OK, restResponseContent);
+            IRestResponse restResponse = Helpers.SetUpRestResponseWithContent(HttpStatusCode.OK, restResponseContent);
 
             var request = Substitute.For<IUsergridRequest>();
             request
-                .Execute(Arg.Any<string>(), Arg.Any<Method>(), Arg.Any<object>(), Arg.Any<string>())
-                .Returns(restResponse);
+                .ExecuteJsonRequest(Arg.Any<string>(), Arg.Any<HttpMethod>(), Arg.Any<object>())
+                .Returns(Task.FromResult(restResponse));
 
             const string collectionName = "collection";
             const string entityName = "entity";
@@ -27,59 +29,30 @@ namespace Usergrid.Sdk.Tests
             var client = new Client(null, null, request: request);
             client.GetEntity<Friend>(collectionName, entityName);
 
-            request.Received(1).Execute(
+            request.Received(1).ExecuteJsonRequest(
                 Arg.Is(string.Format("/{0}/{1}", collectionName, entityName)),
-                Arg.Is(Method.GET),
-                Arg.Any<object>(),
-                Arg.Any<string>());
+                Arg.Is(HttpMethod.Get),
+                Arg.Any<object>());
         }
-
+        
         [Test]
-        public void ShouldPassCorrectAccessToken()
-        {
-            const string accessToken = "access_token";
-            IUsergridRequest request = Helpers.InitializeUserGridRequestWithAccessToken(accessToken);
-
-            var restResponseContent = new UsergridGetResponse<Friend> { Entities = new List<Friend>(), Cursor = "" };
-            IRestResponse<UsergridGetResponse<Friend>> restResponse = Helpers.SetUpRestResponseWithContent<UsergridGetResponse<Friend>>(HttpStatusCode.OK, restResponseContent);
-
-            request
-                .Execute(Arg.Any<string>(), Arg.Any<Method>(), Arg.Any<object>(), Arg.Any<string>())
-                .Returns(restResponse);
-
-            const string collectionName = "collection";
-            const string entityName = "entity";
-
-            var client = new Client(null, null, request: request);
-            client.Login(null, null, AuthType.ClientId);
-            var friend = client.GetEntity<Friend>(collectionName, entityName);
-            Assert.IsNull(friend);
-
-            request.Received(1).Execute(
-                Arg.Is(string.Format("/{0}/{1}", collectionName, entityName)),
-                Arg.Is(Method.GET),
-                Arg.Any<object>(),
-                accessToken);
-        }
-
-        [Test]
-        public void ShouldReturnEntityCorrectly()
+        public async void ShouldReturnEntityCorrectly()
         {
             var friend = new Friend { Name = "name", Age = 1 };
 
             var restResponseContent = new UsergridGetResponse<Friend> { Entities = new List<Friend> { friend }, Cursor = "cursor" };
-            IRestResponse<UsergridGetResponse<Friend>> restResponse = Helpers.SetUpRestResponseWithContent<UsergridGetResponse<Friend>>(HttpStatusCode.OK, restResponseContent);
+            IRestResponse restResponse = Helpers.SetUpRestResponseWithContent(HttpStatusCode.OK, restResponseContent);
 
             var request = Substitute.For<IUsergridRequest>();
             request
-                .Execute(Arg.Any<string>(), Arg.Any<Method>(), Arg.Any<object>(), Arg.Any<string>())
-                .Returns(restResponse);
+                .ExecuteJsonRequest(Arg.Any<string>(), Arg.Any<HttpMethod>(), Arg.Any<object>())
+                .Returns(Task.FromResult(restResponse));
 
             const string collectionName = "collection";
             const string entityName = "entity";
 
             var client = new Client(null, null, request: request);
-            var returnedFriend = client.GetEntity<Friend>(collectionName, entityName);
+            var returnedFriend = await client.GetEntity<Friend>(collectionName, entityName);
 
             Assert.IsNotNull(returnedFriend);
             Assert.AreEqual(friend.Name, returnedFriend.Name);
@@ -87,7 +60,7 @@ namespace Usergrid.Sdk.Tests
         }
 
         [Test]
-        public void ShouldReturnFirstEntityInListCorrectly()
+        public async void ShouldReturnFirstEntityInListCorrectly()
         {
             var friend1 = new Friend { Name = "name1", Age = 1 };
             var friend2 = new Friend { Name = "name2", Age = 2 };
@@ -95,18 +68,18 @@ namespace Usergrid.Sdk.Tests
             var entities = new List<Friend> { friend1, friend2 };
             var restResponseContent = new UsergridGetResponse<Friend> { Entities = entities, Cursor = "cursor" };
 
-            IRestResponse<UsergridGetResponse<Friend>> restResponse = Helpers.SetUpRestResponseWithContent<UsergridGetResponse<Friend>>(HttpStatusCode.OK, restResponseContent);
+            IRestResponse restResponse = Helpers.SetUpRestResponseWithContent(HttpStatusCode.OK, restResponseContent);
 
             var request = Substitute.For<IUsergridRequest>();
             request
-                .Execute(Arg.Any<string>(), Arg.Any<Method>(), Arg.Any<object>(), Arg.Any<string>())
-                .Returns(restResponse);
+                .ExecuteJsonRequest(Arg.Any<string>(), Arg.Any<HttpMethod>(), Arg.Any<object>())
+                .Returns(Task.FromResult(restResponse));
 
             const string collectionName = "collection";
             const string entityName = "entity";
 
             var client = new Client(null, null, request: request);
-            var returnedFriend = client.GetEntity<Friend>(collectionName, entityName);
+            var returnedFriend = await client.GetEntity<Friend>(collectionName, entityName);
 
             Assert.IsNotNull(returnedFriend);
             Assert.AreEqual(friend1.Name, returnedFriend.Name);
@@ -114,31 +87,25 @@ namespace Usergrid.Sdk.Tests
         }
 
         [Test]
-        public void ShouldReturnNullEntityCorrectly()
+        public async void ShouldReturnNullEntityCorrectly()
         {
             var entities = new List<Friend> { null };
 
             var restResponseContent = new UsergridGetResponse<Friend> { Entities = entities, Cursor = "cursor" };
-            IRestResponse<UsergridGetResponse<Friend>> restResponse = Helpers.SetUpRestResponseWithContent<UsergridGetResponse<Friend>>(HttpStatusCode.OK, restResponseContent);
+            IRestResponse restResponse = Helpers.SetUpRestResponseWithContent(HttpStatusCode.OK, restResponseContent);
 
             var request = Substitute.For<IUsergridRequest>();
             request
-                .Execute(Arg.Any<string>(), Arg.Any<Method>(), Arg.Any<object>(), Arg.Any<string>())
-                .Returns(restResponse);
+                .ExecuteJsonRequest(Arg.Any<string>(), Arg.Any<HttpMethod>(), Arg.Any<object>())
+                .Returns(Task.FromResult(restResponse));
 
             const string collectionName = "collection";
             const string entityName = "entity";
 
             var client = new Client(null, null, request: request);
-            var returnedFriend = client.GetEntity<Friend>(collectionName, entityName);
+            var returnedFriend = await client.GetEntity<Friend>(collectionName, entityName);
 
             Assert.IsNull(returnedFriend);
         }
-    }
-
-    public class Friend
-    {
-        public string Name { get; set; }
-        public int Age { get; set; }
     }
 }

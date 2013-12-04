@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
-using RestSharp;
+using System.Net.Http;
+using System.Threading.Tasks;
 using Usergrid.Sdk.Model;
 using Usergrid.Sdk.Payload;
 
@@ -12,32 +13,24 @@ namespace Usergrid.Sdk.Manager
         {
         }
 
-        public void CreateNotifierForApple(string notifierName, string environment, string p12CertificatePath)
-        {
-            var formParameters = new Dictionary<string, object>
+        public async Task CreateNotifierForApple(string notifierName, string environment, byte[] p12Certificate) {
+            var payload = new AppleNotifierPayload()
                 {
-                    {"name", notifierName},
-                    {"provider", "apple"},
-                    {"environment", environment}
+                    Name = notifierName,
+                    Environment = environment,
+                    p12Certificate = p12Certificate
                 };
-
-            var fileParameters = new Dictionary<string, string>
-                {
-                    {"p12Certificate", p12CertificatePath}
-                };
-
-
-            IRestResponse response = Request.ExecuteMultipartFormDataRequest("/notifiers", Method.POST, formParameters, fileParameters);
+            IRestResponse response = await Request.ExecuteJsonRequest("/notifiers", HttpMethod.Post, payload);
             ValidateResponse(response);
         }
 
-        public void CreateNotifierForAndroid(string notifierName, string apiKey)
+        public async Task CreateNotifierForAndroid(string notifierName, string apiKey)
         {
-            IRestResponse response = Request.ExecuteJsonRequest("/notifiers", Method.POST, new AndroidNotifierPayload {ApiKey = apiKey, Name = notifierName});
+            IRestResponse response = await Request.ExecuteJsonRequest("/notifiers", HttpMethod.Post, new AndroidNotifierPayload {ApiKey = apiKey, Name = notifierName});
             ValidateResponse(response);
         }
 
-        public void PublishNotification(IEnumerable<Notification> notifications, INotificationRecipients recipients, NotificationSchedulerSettings schedulerSettings = null)
+        public async Task PublishNotification(IEnumerable<Notification> notifications, INotificationRecipients recipients, NotificationSchedulerSettings schedulerSettings = null)
         {
             var payload = new NotificationPayload();
             foreach (Notification notification in notifications)
@@ -55,7 +48,7 @@ namespace Usergrid.Sdk.Manager
 
             string query = recipients.BuildQuery();
 
-            IRestResponse response = Request.ExecuteJsonRequest(query, Method.POST, payload);
+            IRestResponse response = await Request.ExecuteJsonRequest(query, HttpMethod.Post, payload);
             ValidateResponse(response);
         }
     }

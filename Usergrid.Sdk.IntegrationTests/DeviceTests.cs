@@ -1,30 +1,31 @@
 ﻿using NUnit.Framework;
 using Usergrid.Sdk.Model;
 
-namespace Usergrid.Sdk.IntegrationTests
-{
+namespace Usergrid.Sdk.IntegrationTests {
     [TestFixture]
-    public class DeviceTests : BaseTest
-    {
-        [Test]
-        public void ShouldCrudDevices()
-        {
-            const string deviceName = "test_device";
-            var client = InitializeClientAndLogin(AuthType.Organization);
-            DeleteDeviceIfExists(client, deviceName);
+    public class DeviceTests : BaseTest {
+        public class MyCustomUserGridDevice : UsergridDevice {
+            public string DeviceType { get; set; }
+        }
 
-            client.CreateDevice(new UsergridDevice() {Name = deviceName});
+        [Test]
+        public async void ShouldCrudDevices() {
+            const string deviceName = "test_device2";
+            IClient client = await InitializeClientAndLogin(AuthType.Organization);
+            await DeleteDeviceIfExists(client, deviceName);
+
+            await client.CreateDevice(new UsergridDevice {Name = deviceName});
             //get device and assert
-            UsergridDevice device = client.GetDevice<UsergridDevice>(deviceName);
+            UsergridDevice device = await client.GetDevice<UsergridDevice>(deviceName);
             Assert.That(device.Name, Is.EqualTo(deviceName));
 
             //create a custom device
-            DeleteDeviceIfExists(client, deviceName);
+            await DeleteDeviceIfExists(client, deviceName);
             const string deviceTypeiPhone = "iPhone";
 
-            client.CreateDevice(new MyCustomUserGridDevice() { Name = deviceName, DeviceType = deviceTypeiPhone });
+            await client.CreateDevice(new MyCustomUserGridDevice {Name = deviceName, DeviceType = deviceTypeiPhone});
             //get device and assert
-            MyCustomUserGridDevice myCustomDevice = client.GetDevice<MyCustomUserGridDevice>(deviceName);
+            MyCustomUserGridDevice myCustomDevice = await client.GetDevice<MyCustomUserGridDevice>(deviceName);
             Assert.That(myCustomDevice.Name, Is.EqualTo(deviceName));
             Assert.That(myCustomDevice.DeviceType, Is.EqualTo(deviceTypeiPhone));
 
@@ -32,17 +33,12 @@ namespace Usergrid.Sdk.IntegrationTests
             const string deviceTypeAndroid = "Android";
 
             myCustomDevice.DeviceType = deviceTypeAndroid;
-            client.UpdateDevice(myCustomDevice);
+            await client.UpdateDevice(myCustomDevice);
 
             //get device and assert
-            myCustomDevice = client.GetDevice<MyCustomUserGridDevice>(deviceName);
+            myCustomDevice = await client.GetDevice<MyCustomUserGridDevice>(deviceName);
             Assert.That(myCustomDevice.Name, Is.EqualTo(deviceName));
             Assert.That(myCustomDevice.DeviceType, Is.EqualTo(deviceTypeAndroid));
-        }
-
-        public class MyCustomUserGridDevice : UsergridDevice
-        {
-            public string DeviceType { get; set; }
         }
     }
 }

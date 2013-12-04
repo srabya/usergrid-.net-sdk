@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net;
+using System.Net.Http;
+using System.Threading.Tasks;
 using NSubstitute;
 using NUnit.Framework;
-using RestSharp;
 using Usergrid.Sdk.Manager;
 using Usergrid.Sdk.Model;
 using Usergrid.Sdk.Payload;
@@ -25,33 +26,33 @@ namespace Usergrid.Sdk.Tests
 
 
         [Test]
-        public void CreateNotifierForAppleExecutesMultipartFormDataRequestWithCorrectParameters()
+        public void CreateNotifierForAppleExecutesJsonRequestWithCorrectParameters()
         {
             IRestResponse restResponse = Helpers.SetUpRestResponse(HttpStatusCode.OK);
-            _request.ExecuteMultipartFormDataRequest(Arg.Any<string>(), Arg.Any<Method>(), Arg.Any<IDictionary<string, object>>(), Arg.Any<IDictionary<string, string>>())
-                .Returns(restResponse);
+            _request.ExecuteJsonRequest(Arg.Any<string>(), Arg.Any<HttpMethod>(), Arg.Any<object>())
+                .Returns(Task.FromResult(restResponse));
 
-            _notificationsManager.CreateNotifierForApple("notifierName", "development", @"C:\filePath");
+            var p12Certificate = new byte[0];
+            _notificationsManager.CreateNotifierForApple("notifierName", "development", p12Certificate);
 
-            _request.Received(1).ExecuteMultipartFormDataRequest(
+            _request.Received(1).ExecuteJsonRequest(
                 "/notifiers",
-                Method.POST,
-                Arg.Is<IDictionary<string, object>>(d => (string) d["name"] == "notifierName" && (string) d["provider"] == "apple" && (string) d["environment"] == "development"),
-                Arg.Is<IDictionary<string, string>>(d => d["p12Certificate"] == @"C:\filePath"));
+                HttpMethod.Post,
+                Arg.Is<AppleNotifierPayload>(d => d.Name == "notifierName" && d.Provider == "apple" && d.Environment == "development" && d.p12Certificate == p12Certificate));
         }
 
         [Test]
-        public void CreateNotifierForAndroidExecutesMultipartFormDataRequestWithCorrectParameters()
+        public void CreateNotifierForAndroidExecutesJsonRequestWithCorrectParameters()
         {
             IRestResponse restResponse = Helpers.SetUpRestResponse(HttpStatusCode.OK);
-            _request.ExecuteJsonRequest(Arg.Any<string>(), Arg.Any<Method>(), Arg.Any<object>())
-                .Returns(restResponse);
+            _request.ExecuteJsonRequest(Arg.Any<string>(), Arg.Any<HttpMethod>(), Arg.Any<object>())
+                .Returns(Task.FromResult(restResponse));
 
             _notificationsManager.CreateNotifierForAndroid("notifierName", "apiKey");
 
             _request.Received(1).ExecuteJsonRequest(
                 "/notifiers",
-                Method.POST,
+                HttpMethod.Post,
                 Arg.Is<AndroidNotifierPayload>(p => p.ApiKey == "apiKey" && p.Name == "notifierName" && p.Provider == "google"));
         }
 
@@ -59,8 +60,8 @@ namespace Usergrid.Sdk.Tests
         public void PublishNotificationPostsByBuildingQueryAndPayload()
         {
             IRestResponse restResponse = Helpers.SetUpRestResponse(HttpStatusCode.OK);
-            _request.ExecuteJsonRequest(Arg.Any<string>(), Arg.Any<Method>(), Arg.Any<object>())
-                .Returns(restResponse);
+            _request.ExecuteJsonRequest(Arg.Any<string>(), Arg.Any<HttpMethod>(), Arg.Any<object>())
+                .Returns(Task.FromResult(restResponse));
 
             var recipients = Substitute.For<INotificationRecipients>();
             recipients.BuildQuery().Returns("query");
@@ -94,7 +95,7 @@ namespace Usergrid.Sdk.Tests
 
                                                                       return isValid;
                                                                   };
-            _request.Received(1).ExecuteJsonRequest("query", Method.POST,
+            _request.Received(1).ExecuteJsonRequest("query", HttpMethod.Post,
                                                     Arg.Is<NotificationPayload>(
                                                         p => validatePayload(p)));
         }

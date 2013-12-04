@@ -1,8 +1,9 @@
 ﻿using System.Net;
+using System.Net.Http;
 using System.Reflection;
+using System.Threading.Tasks;
 using NSubstitute;
 using Newtonsoft.Json;
-using RestSharp;
 using Usergrid.Sdk.Model;
 using Usergrid.Sdk.Payload;
 
@@ -15,18 +16,13 @@ namespace Usergrid.Sdk.Tests
             return JsonConvert.SerializeObject(obj);
         }
 
-		internal static IRestResponse<T> SetUpRestResponseWithContent<T>(HttpStatusCode httpStatusCode, object responseContent)
+		internal static IRestResponse SetUpRestResponseWithContent(HttpStatusCode httpStatusCode, object responseContent)
 		{
-		    return SetUpRestResponseWithContent<T>(httpStatusCode, responseContent.Serialize());
-		}
-		
-        internal static IRestResponse<T> SetUpRestResponseWithContent<T>(HttpStatusCode httpStatusCode, string responseContent)
-        {
-            var restResponse = Substitute.For<IRestResponse<T>>();
+            var restResponse = Substitute.For<IRestResponse>();
             restResponse.StatusCode.Returns(httpStatusCode);
-            restResponse.Content.Returns(responseContent);
+            restResponse.Content.Returns(responseContent is string ? responseContent : responseContent.Serialize());
             return restResponse;
-        }
+		}
 
         internal static IRestResponse SetUpRestResponse(HttpStatusCode httpStatusCode)
         {
@@ -35,32 +31,32 @@ namespace Usergrid.Sdk.Tests
             return restResponse;
         }
 
-		internal static IRestResponse<T> SetUpRestResponseWithData<T>(HttpStatusCode httpStatusCode, T responseData)
+		internal static IRestResponse SetUpRestResponseWithData(HttpStatusCode httpStatusCode, object responseData)
         {
-            var restResponse = Substitute.For<IRestResponse<T>>();
+            var restResponse = Substitute.For<IRestResponse>();
             restResponse.StatusCode.Returns(httpStatusCode);
-            restResponse.Data.Returns(responseData);
+            restResponse.Content.Returns(JsonConvert.SerializeObject(responseData));
             return restResponse;
         }
-
-        internal static IUsergridRequest SetUpUsergridRequestWithRestResponse<T>(IRestResponse<T> restResponse) where T : new()
+//
+        internal static IUsergridRequest SetUpUsergridRequestWithRestResponse(IRestResponse restResponse)
         {
             var request = Substitute.For<IUsergridRequest>();
             request
-                .ExecuteJsonRequest<T>(Arg.Any<string>(), Arg.Any<Method>(), Arg.Any<object>())
-                .Returns(restResponse);
+                .ExecuteJsonRequest(Arg.Any<string>(), Arg.Any<HttpMethod>(), Arg.Any<object>())
+                .Returns(Task.FromResult(restResponse));
 
             return request;
         }
 
 		internal static IUsergridRequest InitializeUserGridRequestWithAccessToken(string accessToken)
         {
-            IRestResponse<LoginResponse> loginResponse = SetUpRestResponseWithData(HttpStatusCode.OK, new LoginResponse {AccessToken = accessToken});
+            IRestResponse loginResponse = SetUpRestResponseWithData(HttpStatusCode.OK, new LoginResponse {AccessToken = accessToken});
 
             var request = Substitute.For<IUsergridRequest>();
             request
-                .ExecuteJsonRequest<LoginResponse>(Arg.Any<string>(), Arg.Any<Method>(), Arg.Any<object>())
-                .Returns(loginResponse);
+                .ExecuteJsonRequest(Arg.Any<string>(), Arg.Any<HttpMethod>(), Arg.Any<object>())
+                .Returns(Task.FromResult(loginResponse));
 
             return request;
         }

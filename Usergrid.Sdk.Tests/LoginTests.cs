@@ -1,8 +1,10 @@
 ﻿using System.Net;
+using System.Net.Http;
+using System.Threading.Tasks;
 using NSubstitute;
 using NUnit.Framework;
-using RestSharp;
 using Usergrid.Sdk.Model;
+using Usergrid.Sdk.Payload;
 
 namespace Usergrid.Sdk.Tests
 {
@@ -12,115 +14,94 @@ namespace Usergrid.Sdk.Tests
         [Test]
         public void ShouldPostToCorrectEndPoint()
         {
-            var restResponse = Substitute.For<IRestResponse<LoginResponse>>();
+            var restResponse = Substitute.For<IRestResponse>();
             restResponse.StatusCode.Returns(HttpStatusCode.OK);
-            restResponse.Data.Returns(new LoginResponse { AccessToken = "access_token" });
+            restResponse.Content.Returns(new LoginResponse { AccessToken = "access_token" }.Serialize());
 
             var request = Substitute.For<IUsergridRequest>();
             request
-                .Execute<LoginResponse>(Arg.Any<string>(), Arg.Any<Method>(), Arg.Any<object>(), Arg.Any<string>())
-                .Returns(restResponse);
+                .ExecuteJsonRequest(Arg.Any<string>(), Arg.Any<HttpMethod>(), Arg.Any<object>())
+                .Returns(Task.FromResult(restResponse));
 
             var client = new Client(null, null, request: request);
-            client.Login(null, null, AuthType.ClientId);
+            client.Login(null, null, AuthType.Organization);
 
-            request.Received(1).Execute<LoginResponse>(Arg.Is("/token"), Arg.Is(Method.POST), Arg.Any<object>(), Arg.Any<string>());
+            request.Received(1).ExecuteJsonRequest(Arg.Is("/token"), Arg.Is(HttpMethod.Post), Arg.Any<object>());
         }
-
-        [Test]
-        public void ShouldNotPassAccessTokenWhenLoggingIn()
-        {
-            var restResponse = Substitute.For<IRestResponse<LoginResponse>>();
-            restResponse.StatusCode.Returns(HttpStatusCode.OK);
-            restResponse.Data.Returns(new LoginResponse { AccessToken = "access_token" });
-
-            var request = Substitute.For<IUsergridRequest>();
-            request
-                .Execute<LoginResponse>(Arg.Any<string>(), Arg.Any<Method>(), Arg.Any<object>(), Arg.Any<string>())
-                .Returns(restResponse);
-
-            var client = new Client(null, null, request: request);
-            client.Login(null, null, AuthType.ClientId);
-
-            request.Received(1).Execute<LoginResponse>(Arg.Any<string>(), Arg.Any<Method>(), Arg.Any<object>(), Arg.Is((string)null));
-        }
-
+        
         [Test]
         public void ShouldLoginWithApplicationCredentialsWithCorrectRequestBody()
         {
-            var restResponse = Substitute.For<IRestResponse<LoginResponse>>();
+            var restResponse = Substitute.For<IRestResponse>();
             restResponse.StatusCode.Returns(HttpStatusCode.OK);
-            restResponse.Data.Returns(new LoginResponse { AccessToken = "access_token" });
+            restResponse.Content.Returns(new LoginResponse { AccessToken = "access_token" }.Serialize());
 
             var request = Substitute.For<IUsergridRequest>();
             request
-                .Execute<LoginResponse>(Arg.Any<string>(), Arg.Any<Method>(), Arg.Any<object>(), Arg.Any<string>())
-                .Returns(restResponse);
+                .ExecuteJsonRequest(Arg.Any<string>(), Arg.Any<HttpMethod>(), Arg.Any<object>())
+                .Returns(Task.FromResult(restResponse));
 
             const string clientLoginId = "client_login_id";
             const string clientSecret = "client_secret";
 
             var client = new Client(null, null, request: request);
-            client.Login(clientLoginId, clientSecret, AuthType.ClientId);
+            client.Login(clientLoginId, clientSecret, AuthType.Organization);
 
             request
                 .Received(1)
-                .Execute<LoginResponse>(
+                .ExecuteJsonRequest(
                     Arg.Any<string>(),
-                    Arg.Any<Method>(),
-                    Arg.Is<ClientIdLoginPayload>(d => d.GrantType == "client_credentials" && d.ClientId == clientLoginId && d.ClientSecret == clientSecret),
-                    Arg.Any<string>());
+                    Arg.Any<HttpMethod>(),
+                    Arg.Is<ClientIdLoginPayload>(d => d.GrantType == "client_credentials" && d.ClientId == clientLoginId && d.ClientSecret == clientSecret));
         }
 
         [Test]
         public void ShouldLoginWithUserCredentialsWithCorrectRequestBody()
         {
-            var restResponse = Substitute.For<IRestResponse<LoginResponse>>();
+            var restResponse = Substitute.For<IRestResponse>();
             restResponse.StatusCode.Returns(HttpStatusCode.OK);
-            restResponse.Data.Returns(new LoginResponse { AccessToken = "access_token" });
+            restResponse.Content.Returns(new LoginResponse { AccessToken = "access_token" }.Serialize());
 
             const string clientLoginId = "client_login_id";
             const string clientSecret = "client_secret";
 
             var request = Substitute.For<IUsergridRequest>();
             request
-                .Execute<LoginResponse>(
+                .ExecuteJsonRequest(
                     Arg.Any<string>(),
-                    Arg.Any<Method>(),
-                    Arg.Any<UserLoginPayload>(),
-                    Arg.Any<string>())
-                .Returns(restResponse);
+                    Arg.Any<HttpMethod>(),
+                    Arg.Any<UserLoginPayload>())
+                .Returns(Task.FromResult(restResponse));
 
             var client = new Client(null, null, request: request);
             client.Login(clientLoginId, clientSecret, AuthType.User);
 
             request
                 .Received(1)
-                .Execute<LoginResponse>(
+                .ExecuteJsonRequest(
                     Arg.Any<string>(),
-                    Arg.Any<Method>(),
-                    Arg.Is<UserLoginPayload>(d => d.GrantType == "password" && d.UserName == clientLoginId && d.Password == clientSecret),
-                    Arg.Any<string>());
+                    Arg.Any<HttpMethod>(),
+                    Arg.Is<UserLoginPayload>(d => d.GrantType == "password" && d.UserName == clientLoginId && d.Password == clientSecret));
         }
 
         [Test]
-        public void ShouldTranslateToUserGridErrorAndThrowWhenServiceReturnsBadRequest()
+        public async void ShouldTranslateToUserGridErrorAndThrowWhenServiceReturnsBadRequest()
         {
             string restResponseContent = new UsergridError { Description = "Invalid username or password", Error = "invalid_grant" }.Serialize();
 
-            var restResponse = Substitute.For<IRestResponse<LoginResponse>>();
+            var restResponse = Substitute.For<IRestResponse>();
             restResponse.StatusCode.Returns(HttpStatusCode.BadRequest);
             restResponse.Content.Returns(restResponseContent);
 
             var request = Substitute.For<IUsergridRequest>();
             request
-                .Execute<LoginResponse>(Arg.Any<string>(), Arg.Any<Method>(), Arg.Any<object>(), Arg.Any<string>())
-                .Returns(restResponse);
+                .ExecuteJsonRequest(Arg.Any<string>(), Arg.Any<HttpMethod>(), Arg.Any<object>())
+                .Returns(Task.FromResult(restResponse));
 
             var client = new Client(null, null, request: request);
             try
             {
-                client.Login(null, null, AuthType.ClientId);
+                await client.Login(null, null, AuthType.Organization);
                 throw new AssertionException("UserGridException was expected to be thrown here");
             }
             catch (UsergridException e)
@@ -135,21 +116,19 @@ namespace Usergrid.Sdk.Tests
         {
             const string accessToken = "access_token";
 
-            var restResponse = Substitute.For<IRestResponse<LoginResponse>>();
+            var restResponse = Substitute.For<IRestResponse>();
             restResponse.StatusCode.Returns(HttpStatusCode.OK);
-            restResponse.Data.Returns(new LoginResponse { AccessToken = accessToken });
+            restResponse.Content.Returns(new LoginResponse { AccessToken = accessToken }.Serialize());
 
             var request = Substitute.For<IUsergridRequest>();
             request
-                .Execute<LoginResponse>(Arg.Any<string>(), Arg.Any<Method>(), Arg.Any<object>(), Arg.Any<string>())
-                .Returns(restResponse);
+                .ExecuteJsonRequest(Arg.Any<string>(), Arg.Any<HttpMethod>(), Arg.Any<object>())
+                .Returns(Task.FromResult(restResponse));
 
             var client = new Client(null, null, request: request);
-            client.Login(null, null, AuthType.ClientId);
+            client.Login(null, null, AuthType.Organization);
 
-            Assert.That(client.AccessToken, Is.EqualTo(accessToken));
+            Assert.That(request.AccessToken, Is.EqualTo(accessToken));
         }
-
-      
     }
 }

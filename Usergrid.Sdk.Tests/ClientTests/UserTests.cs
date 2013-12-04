@@ -1,4 +1,5 @@
-﻿using NSubstitute;
+﻿using System.Threading.Tasks;
+using NSubstitute;
 using NUnit.Framework;
 using Usergrid.Sdk.Manager;
 using Usergrid.Sdk.Model;
@@ -44,13 +45,13 @@ namespace Usergrid.Sdk.Tests.ClientTests
 
         [Test]
         [ExpectedException(ExpectedException = typeof (UsergridException), ExpectedMessage = "Exception message")]
-        public void CreateUserShouldPassOnTheException()
+        public async void CreateUserShouldPassOnTheException()
         {
             _entityManager
                 .When(m => m.CreateEntity("users", Arg.Any<UsergridUser>()))
                 .Do(m => { throw new UsergridException(new UsergridError {Description = "Exception message"}); });
 
-            _client.CreateUser<UsergridUser>(null);
+            await _client.CreateUser<UsergridUser>(null);
         }
 
         [Test]
@@ -63,13 +64,13 @@ namespace Usergrid.Sdk.Tests.ClientTests
 
         [Test]
         [ExpectedException(ExpectedException = typeof (UsergridException), ExpectedMessage = "Exception message")]
-        public void DeleteUserShouldPassOnTheException()
+        public async void DeleteUserShouldPassOnTheException()
         {
             _entityManager
                 .When(m => m.DeleteEntity("users", Arg.Any<string>()))
                 .Do(m => { throw new UsergridException(new UsergridError {Description = "Exception message"}); });
 
-            _client.DeleteUser(null);
+            await _client.DeleteUser(null);
         }
 
         [Test]
@@ -82,32 +83,32 @@ namespace Usergrid.Sdk.Tests.ClientTests
 
         [Test]
         [ExpectedException(ExpectedException = typeof (UsergridException), ExpectedMessage = "Exception message")]
-        public void GetUserShouldPassOnTheException()
+        public async void GetUserShouldPassOnTheException()
         {
             _entityManager
                 .When(m => m.GetEntity<UsergridUser>("users", Arg.Any<string>()))
                 .Do(m => { throw new UsergridException(new UsergridError {Description = "Exception message"}); });
 
-            _client.GetUser<UsergridUser>(null);
+           await _client.GetUser<UsergridUser>(null);
         }
 
         [Test]
-        public void GetUserShouldReturnNullForUnexistingUser()
-        {
-            _entityManager.GetEntity<UsergridUser>("users", "identifier").Returns((x) => null);
+        public async void GetUserShouldReturnNullForUnexistingUser() {
+            UsergridUser user = null;
+            _entityManager.GetEntity<UsergridUser>("users", "identifier").Returns((x) => Task.FromResult(user));
 
-            var usergridUser = _client.GetUser<UsergridUser>("identifier");
+            var usergridUser = await _client.GetUser<UsergridUser>("identifier");
 
             Assert.IsNull(usergridUser);
         }
 
         [Test]
-        public void GetUserShouldReturnUsergridUser()
+        public async void GetUserShouldReturnUsergridUser()
         {
             var usergridUser = new UsergridUser();
-            _entityManager.GetEntity<UsergridUser>("users", "identifier").Returns((x) => usergridUser);
+            _entityManager.GetEntity<UsergridUser>("users", "identifier").Returns((x) => Task.FromResult(usergridUser));
 
-            var returnedUser = _client.GetUser<UsergridUser>("identifier");
+            var returnedUser = await _client.GetUser<UsergridUser>("identifier");
 
             Assert.AreEqual(usergridUser, returnedUser);
         }
@@ -124,7 +125,7 @@ namespace Usergrid.Sdk.Tests.ClientTests
 
         [Test]
         [ExpectedException(ExpectedException = typeof (UsergridException), ExpectedMessage = "Exception message")]
-        public void UpdateUserShouldPassOnTheException()
+        public async void UpdateUserShouldPassOnTheException()
         {
             var user = new UsergridUser {UserName = "userName"};
 
@@ -132,7 +133,7 @@ namespace Usergrid.Sdk.Tests.ClientTests
                 .When(m => m.UpdateEntity("users", user.UserName, user))
                 .Do(m => { throw new UsergridException(new UsergridError {Description = "Exception message"}); });
 
-            _client.UpdateUser(user);
+            await _client.UpdateUser(user);
         }
     }
 }

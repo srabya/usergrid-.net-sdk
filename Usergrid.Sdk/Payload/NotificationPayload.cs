@@ -1,7 +1,4 @@
-using System;
 using System.Collections.Generic;
-using System.Dynamic;
-using RestSharp;
 using Newtonsoft.Json;
 
 namespace Usergrid.Sdk.Payload

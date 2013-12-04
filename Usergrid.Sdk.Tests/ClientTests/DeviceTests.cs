@@ -1,4 +1,5 @@
-﻿using NSubstitute;
+﻿using System.Threading.Tasks;
+using NSubstitute;
 using NUnit.Framework;
 using Usergrid.Sdk.Manager;
 using Usergrid.Sdk.Model;
@@ -34,13 +35,13 @@ namespace Usergrid.Sdk.Tests.ClientTests
 
         [Test]
         [ExpectedException(ExpectedException = typeof (UsergridException), ExpectedMessage = "Exception message")]
-        public void CreateDeviceShouldPassOnTheException()
+        public async void CreateDeviceShouldPassOnTheException()
         {
             _entityManager
                 .When(m => m.CreateEntity("devices", Arg.Any<UsergridDevice>()))
                 .Do(m => { throw new UsergridException(new UsergridError {Description = "Exception message"}); });
 
-            _client.CreateDevice<UsergridDevice>(null);
+            await _client.CreateDevice<UsergridDevice>(null);
         }
 
         [Test]
@@ -53,13 +54,13 @@ namespace Usergrid.Sdk.Tests.ClientTests
 
         [Test]
         [ExpectedException(ExpectedException = typeof (UsergridException), ExpectedMessage = "Exception message")]
-        public void DeleteDeviceShouldPassOnTheException()
+        public async void DeleteDeviceShouldPassOnTheException()
         {
             _entityManager
                 .When(m => m.DeleteEntity("devices", Arg.Any<string>()))
                 .Do(m => { throw new UsergridException(new UsergridError {Description = "Exception message"}); });
 
-            _client.DeleteDevice(null);
+            await _client.DeleteDevice(null);
         }
 
         [Test]
@@ -72,32 +73,32 @@ namespace Usergrid.Sdk.Tests.ClientTests
 
         [Test]
         [ExpectedException(ExpectedException = typeof (UsergridException), ExpectedMessage = "Exception message")]
-        public void GetDeviceShouldPassOnTheException()
+        public async void GetDeviceShouldPassOnTheException()
         {
             _entityManager
                 .When(m => m.GetEntity<UsergridDevice>("devices", Arg.Any<string>()))
                 .Do(m => { throw new UsergridException(new UsergridError {Description = "Exception message"}); });
 
-            _client.GetDevice<UsergridDevice>(null);
+            await _client.GetDevice<UsergridDevice>(null);
         }
 
         [Test]
-        public void GetDeviceShouldReturnNullForUnexistingDevice()
-        {
-            _entityManager.GetEntity<UsergridDevice>("devices", "identifier").Returns(x => null);
+        public async void GetDeviceShouldReturnNullForUnexistingDevice() {
+            UsergridDevice device = null;
+            _entityManager.GetEntity<UsergridDevice>("devices", "identifier").Returns(x => Task.FromResult(device));
 
-            var usergridDevice = _client.GetDevice<UsergridDevice>("identifier");
+            var usergridDevice = await _client.GetDevice<UsergridDevice>("identifier");
 
             Assert.IsNull(usergridDevice);
         }
 
         [Test]
-        public void GetDeviceShouldReturnUsergridDevice()
+        public async void GetDeviceShouldReturnUsergridDevice()
         {
             var usergridDevice = new UsergridDevice();
-            _entityManager.GetEntity<UsergridDevice>("devices", "identifier").Returns(x => usergridDevice);
+            _entityManager.GetEntity<UsergridDevice>("devices", "identifier").Returns(x => Task.FromResult(usergridDevice));
 
-            var returnedDevice = _client.GetDevice<UsergridDevice>("identifier");
+            var returnedDevice = await _client.GetDevice<UsergridDevice>("identifier");
 
             Assert.AreEqual(usergridDevice, returnedDevice);
         }
@@ -114,7 +115,7 @@ namespace Usergrid.Sdk.Tests.ClientTests
 
         [Test]
         [ExpectedException(ExpectedException = typeof (UsergridException), ExpectedMessage = "Exception message")]
-        public void UpdateDeviceShouldPassOnTheException()
+        public async void UpdateDeviceShouldPassOnTheException()
         {
             var device = new UsergridDevice {Name = "deviceName"};
 
@@ -122,7 +123,7 @@ namespace Usergrid.Sdk.Tests.ClientTests
                 .When(m => m.UpdateEntity("devices", device.Name, device))
                 .Do(m => { throw new UsergridException(new UsergridError {Description = "Exception message"}); });
 
-            _client.UpdateDevice(device);
+            await _client.UpdateDevice(device);
         }
     }
 }

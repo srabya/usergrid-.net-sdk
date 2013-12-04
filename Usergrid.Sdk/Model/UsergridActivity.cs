@@ -17,11 +17,14 @@ namespace Usergrid.Sdk.Model
 			};
 		}
 
+        [JsonProperty("actor")]
 		public UsergridActor Actor {get;set;}
 
-		public string Verb {get;set;}
+        [JsonProperty("verb")]
+        public string Verb { get; set; }
 
-		public string Content { get; set;}
+        [JsonProperty("content")]
+        public string Content { get; set; }
 
 		[JsonProperty("published")]
 		private long PublishedLong {  get;  set;}

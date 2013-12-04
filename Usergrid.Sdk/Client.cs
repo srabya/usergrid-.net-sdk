@@ -1,7 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Net;
+using System.Net.Http;
+using System.Threading.Tasks;
 using Newtonsoft.Json;
-using RestSharp;
 using Usergrid.Sdk.Manager;
 using Usergrid.Sdk.Model;
 using Usergrid.Sdk.Payload;
@@ -47,193 +48,187 @@ namespace Usergrid.Sdk {
             set { _notificationsManager = value; }
         }
 
-        public void Login(string loginId, string secret, AuthType authType) {
-            AuthenticationManager.Login(loginId, secret, authType);
+        public async Task Login(string loginId, string secret, AuthType authType) {
+            await AuthenticationManager.Login(loginId, secret, authType);
         }
 
-        public T CreateEntity<T>(string collection, T entity) {
-            return EntityManager.CreateEntity(collection, entity);
+        public async Task<T> CreateEntity<T>(string collection, T entity) {
+            return await EntityManager.CreateEntity(collection, entity);
         }
 
-        public void DeleteEntity(string collection, string name) {
-            EntityManager.DeleteEntity(collection, name);
+        public async Task DeleteEntity(string collection, string name) {
+            await EntityManager.DeleteEntity(collection, name);
         }
 
-        public void UpdateEntity<T>(string collection, string identifier, T entity) {
-            EntityManager.UpdateEntity(collection, identifier, entity);
+        public async Task UpdateEntity<T>(string collection, string identifier, T entity) {
+            await EntityManager.UpdateEntity(collection, identifier, entity);
         }
 
-        public T GetEntity<T>(string collectionName, string entityIdentifier) {
-            return EntityManager.GetEntity<T>(collectionName, entityIdentifier);
+        public async Task<T> GetEntity<T>(string collectionName, string entityIdentifier) {
+            return await EntityManager.GetEntity<T>(collectionName, entityIdentifier);
         }
 
-        public T GetUser<T>(string identifer /*username or uuid or email*/) where T : UsergridUser {
-            var user = GetEntity<T>("users", identifer);
-            if (user == null)
-                return null;
-
+        public async Task<T> GetUser<T>(string identifer /*username or uuid or email*/) where T : UsergridUser {
+            var user = await GetEntity<T>("users", identifer);
             return user;
         }
 
-        public void CreateUser<T>(T user) where T : UsergridUser {
-            CreateEntity("users", user);
+        public async Task CreateUser<T>(T user) where T : UsergridUser {
+            await CreateEntity("users", user);
         }
 
-        public void UpdateUser<T>(T user) where T : UsergridUser {
-            UpdateEntity("users", user.UserName, user);
+        public async Task UpdateUser<T>(T user) where T : UsergridUser {
+            await UpdateEntity("users", user.UserName, user);
         }
 
-        public void DeleteUser(string identifer /*username or uuid or email*/) {
-            DeleteEntity("users", identifer);
+        public async Task DeleteUser(string identifer /*username or uuid or email*/) {
+            await DeleteEntity("users", identifer);
         }
 
-        public void ChangePassword(string identifer /*username or uuid or email*/, string oldPassword, string newPassword) {
-            AuthenticationManager.ChangePassword(identifer, oldPassword, newPassword);
+        public async Task ChangePassword(string identifer /*username or uuid or email*/, string oldPassword, string newPassword) {
+            await AuthenticationManager.ChangePassword(identifer, oldPassword, newPassword);
         }
 
-        public void CreateGroup<T>(T group) where T : UsergridGroup {
-            CreateEntity("groups", group);
+        public async Task CreateGroup<T>(T group) where T : UsergridGroup {
+            await CreateEntity("groups", group);
         }
 
-        public void DeleteGroup(string path) {
-            DeleteEntity("groups", path);
+        public async Task DeleteGroup(string path) {
+            await DeleteEntity("groups", path);
         }
 
-        public T GetGroup<T>(string identifer /*uuid or path*/) where T : UsergridGroup {
-            var usergridGroup = EntityManager.GetEntity<T>("groups", identifer);
+        public async Task<T> GetGroup<T>(string identifer /*uuid or path*/) where T : UsergridGroup {
+            var usergridGroup = await EntityManager.GetEntity<T>("groups", identifer);
             if (usergridGroup == null)
                 return null;
 
             return usergridGroup;
         }
 
-        public void UpdateGroup<T>(T group) where T : UsergridGroup {
-            UpdateEntity("groups", group.Path, group);
+        public async Task UpdateGroup<T>(T group) where T : UsergridGroup {
+            await UpdateEntity("groups", group.Path, group);
         }
 
-        public void AddUserToGroup(string groupIdentifier, string userName) {
-            EntityManager.CreateEntity<object>(string.Format("/groups/{0}/users/{1}", groupIdentifier, userName), null);
+        public async Task AddUserToGroup(string groupIdentifier, string userName) {
+            await EntityManager.CreateEntity<object>(string.Format("/groups/{0}/users/{1}", groupIdentifier, userName), null);
         }
 
-        public void DeleteUserFromGroup(string groupIdentifier, string userIdentifier) {
-            DeleteEntity("/groups/" + groupIdentifier + "/users", userIdentifier);
+        public async Task DeleteUserFromGroup(string groupIdentifier, string userIdentifier) {
+            await DeleteEntity("/groups/" + groupIdentifier + "/users", userIdentifier);
         }
 
-        public IList<T> GetAllUsersInGroup<T>(string groupName) where T : UsergridUser {
-            IRestResponse response = _request.ExecuteJsonRequest(string.Format("/groups/{0}/users", groupName), Method.GET);
+        public async Task<IList<T>> GetAllUsersInGroup<T>(string groupName) where T : UsergridUser {
+            IRestResponse response = await _request.ExecuteJsonRequest(string.Format("/groups/{0}/users", groupName), HttpMethod.Get);
             ValidateResponse(response);
 
             var responseObject = JsonConvert.DeserializeObject<UsergridGetResponse<T>>(response.Content);
             return responseObject.Entities;
         }
 
-        public UsergridCollection<T> GetEntities<T>(string collection, int limit = 10, string query = null) {
-            return EntityManager.GetEntities<T>(collection, limit, query);
+        public async Task<UsergridCollection<T>> GetEntities<T>(string collection, int limit = 10, string query = null) {
+            return await EntityManager.GetEntities<T>(collection, limit, query);
         }
 
-        public UsergridCollection<T> GetNextEntities<T>(string collection, string query = null) {
-            return EntityManager.GetNextEntities<T>(collection, query);
+        public async Task<UsergridCollection<T>> GetNextEntities<T>(string collection, string query = null) {
+            return await EntityManager.GetNextEntities<T>(collection, query);
         }
 
-        public UsergridCollection<T> GetPreviousEntities<T>(string collection, string query = null) {
-            return EntityManager.GetPreviousEntities<T>(collection, query);
+        public async Task<UsergridCollection<T>> GetPreviousEntities<T>(string collection, string query = null) {
+            return await EntityManager.GetPreviousEntities<T>(collection, query);
         }
 
-        public void CreateConnection(Connection connection) {
-            ConnectionManager.CreateConnection(connection);
+        public async Task CreateConnection(Connection connection) {
+            await ConnectionManager.CreateConnection(connection);
         }
-        public IList<UsergridEntity> GetConnections(Connection connection) {
-            return ConnectionManager.GetConnections(connection);
+        public async Task<IList<UsergridEntity>> GetConnections(Connection connection) {
+            return await ConnectionManager.GetConnections(connection);
         }
-        public IList<TConnectee> GetConnections<TConnectee>(Connection connection) {
-            return ConnectionManager.GetConnections<TConnectee>(connection);
+        public async Task<IList<TConnectee>> GetConnections<TConnectee>(Connection connection) {
+            return await ConnectionManager.GetConnections<TConnectee>(connection);
         }
-        public void DeleteConnection(Connection connection) {
-            ConnectionManager.DeleteConnection(connection);
+        public async Task DeleteConnection(Connection connection) {
+            await ConnectionManager.DeleteConnection(connection);
         }
 
-        public void PostActivity<T>(string userIdentifier, T activity) where T : UsergridActivity {
+        public async Task PostActivity<T>(string userIdentifier, T activity) where T : UsergridActivity {
             string collection = string.Format("/users/{0}/activities", userIdentifier);
-            EntityManager.CreateEntity(collection, activity);
+            await EntityManager.CreateEntity(collection, activity);
         }
 
-        public void PostActivityToGroup<T>(string groupIdentifier, T activity) where T : UsergridActivity {
+        public async Task PostActivityToGroup<T>(string groupIdentifier, T activity) where T : UsergridActivity {
             string collection = string.Format("/groups/{0}/activities", groupIdentifier);
-            EntityManager.CreateEntity(collection, activity);
+            await EntityManager.CreateEntity(collection, activity);
         }
 
-        public void PostActivityToUsersFollowersInGroup<T>(string userIdentifier, string groupIdentifier, T activity) where T : UsergridActivity {
+        public async Task PostActivityToUsersFollowersInGroup<T>(string userIdentifier, string groupIdentifier, T activity) where T : UsergridActivity {
             string collection = string.Format("/groups/{0}/users/{1}/activities", groupIdentifier, userIdentifier);
-            EntityManager.CreateEntity(collection, activity);
+            await EntityManager.CreateEntity(collection, activity);
         }
 
-        public UsergridCollection<T> GetUserActivities<T>(string userIdentifier) where T : UsergridActivity {
+        public async Task<UsergridCollection<T>> GetUserActivities<T>(string userIdentifier) where T : UsergridActivity {
             string collection = string.Format("/users/{0}/activities", userIdentifier);
-            return EntityManager.GetEntities<T>(collection);
+            return await EntityManager.GetEntities<T>(collection);
         }
 
-        public UsergridCollection<T> GetGroupActivities<T>(string groupIdentifier) where T : UsergridActivity {
+        public async Task<UsergridCollection<T>> GetGroupActivities<T>(string groupIdentifier) where T : UsergridActivity {
             string collection = string.Format("/groups/{0}/activities", groupIdentifier);
-            return EntityManager.GetEntities<T>(collection);
+            return await EntityManager.GetEntities<T>(collection);
         }
 
-        public T GetDevice<T>(string identifer) where T : UsergridDevice {
-            var device = GetEntity<T>("devices", identifer);
+        public async Task<T> GetDevice<T>(string identifer) where T : UsergridDevice {
+            var device = await GetEntity<T>("devices", identifer);
             if (device == null)
                 return null;
 
             return device;
         }
 
-        public void UpdateDevice<T>(T device) where T : UsergridDevice {
-            UpdateEntity("devices", device.Name, device);
+        public async Task UpdateDevice<T>(T device) where T : UsergridDevice {
+            await UpdateEntity("devices", device.Name, device);
         }
 
-        public void CreateDevice<T>(T device) where T : UsergridDevice {
-            CreateEntity("devices", device);
+        public async Task CreateDevice<T>(T device) where T : UsergridDevice {
+            await CreateEntity("devices", device);
         }
 
-        public void DeleteDevice(string identifer) {
-            DeleteEntity("devices", identifer);
+        public async Task DeleteDevice(string identifer) {
+            await DeleteEntity("devices", identifer);
         }
 
-        public void CreateNotifierForApple(string notifierName, string environment, string p12CertificatePath) {
-            NotificationsManager.CreateNotifierForApple(notifierName, environment, p12CertificatePath);
+        public async Task CreateNotifierForApple(string notifierName, string environment, byte[] p12Certificate) {
+            await NotificationsManager.CreateNotifierForApple(notifierName, environment, p12Certificate);
         }
 
-        public void CreateNotifierForAndroid(string notifierName, string apiKey) {
-            NotificationsManager.CreateNotifierForAndroid(notifierName, apiKey);
+        public async Task CreateNotifierForAndroid(string notifierName, string apiKey) {
+            await NotificationsManager.CreateNotifierForAndroid(notifierName, apiKey);
         }
 
-        public T GetNotifier<T>(string identifer /*uuid or notifier name*/) where T : UsergridNotifier {
-            var usergridNotifier = EntityManager.GetEntity<T>("/notifiers", identifer);
-            if (usergridNotifier == null)
-                return null;
-
+        public async Task<T> GetNotifier<T>(string identifer /*uuid or notifier name*/) where T : UsergridNotifier {
+            var usergridNotifier = await EntityManager.GetEntity<T>("/notifiers", identifer);
             return usergridNotifier;
         }
 
-        public void DeleteNotifier(string notifierName) {
-            EntityManager.DeleteEntity("/notifiers", notifierName);
+        public async Task DeleteNotifier(string notifierName) {
+            await EntityManager.DeleteEntity("/notifiers", notifierName);
         }
 
-        public void PublishNotification(IEnumerable<Notification> notifications, INotificationRecipients recipients, NotificationSchedulerSettings schedulerSettings = null) {
-            NotificationsManager.PublishNotification(notifications, recipients, schedulerSettings);
+        public async Task PublishNotification(IEnumerable<Notification> notifications, INotificationRecipients recipients, NotificationSchedulerSettings schedulerSettings = null) {
+            await NotificationsManager.PublishNotification(notifications, recipients, schedulerSettings);
         }
 
-        public void CancelNotification(string notificationIdentifier) {
-            EntityManager.UpdateEntity("/notifications", notificationIdentifier, new CancelNotificationPayload {Canceled = true});
+        public async Task CancelNotification(string notificationIdentifier) {
+            await EntityManager.UpdateEntity("/notifications", notificationIdentifier, new CancelNotificationPayload {Canceled = true});
         }
 
         //TODO: IList?
-        public UsergridCollection<T> GetUserFeed<T>(string userIdentifier) where T : UsergridActivity {
+        public async Task<UsergridCollection<T>> GetUserFeed<T>(string userIdentifier) where T : UsergridActivity {
             string collection = string.Format("/users/{0}/feed", userIdentifier);
-            return EntityManager.GetEntities<T>(collection);
+            return await EntityManager.GetEntities<T>(collection);
         }
 
-        public UsergridCollection<T> GetGroupFeed<T>(string groupIdentifier) where T : UsergridActivity {
+        public async Task<UsergridCollection<T>> GetGroupFeed<T>(string groupIdentifier) where T : UsergridActivity {
             string collection = string.Format("/groups/{0}/feed", groupIdentifier);
-            return EntityManager.GetEntities<T>(collection);
+            return await EntityManager.GetEntities<T>(collection);
         }
 
 

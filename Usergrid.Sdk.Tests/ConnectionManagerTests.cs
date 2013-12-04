@@ -1,8 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Net;
+using System.Net.Http;
+using System.Threading.Tasks;
 using NSubstitute;
 using NUnit.Framework;
-using RestSharp;
 using Usergrid.Sdk.Manager;
 using Usergrid.Sdk.Model;
 using Usergrid.Sdk.Payload;
@@ -35,8 +36,8 @@ namespace Usergrid.Sdk.Tests
             IRestResponse restResponse = Helpers.SetUpRestResponse(HttpStatusCode.OK);
 
             _request
-                .ExecuteJsonRequest(Arg.Any<string>(), Arg.Any<Method>(), Arg.Any<object>())
-                .Returns(restResponse);
+                .ExecuteJsonRequest(Arg.Any<string>(), Arg.Any<HttpMethod>(), Arg.Any<object>())
+                .Returns(Task.FromResult(restResponse));
 
             _connectionManager.CreateConnection(connection);
 
@@ -44,18 +45,18 @@ namespace Usergrid.Sdk.Tests
                 .Received(1)
                 .ExecuteJsonRequest(
                     "/users/userName/has/devices/deviceName",
-                    Method.POST);
+                    HttpMethod.Post);
         }
 
         [Test]
         public void CreateConnectionShouldThrowUsergridExceptionWhenBadResponse() {
             var connection = new Connection();
             var restResponseContent = new UsergridError {Description = "Exception message", Error = "error code"};
-            IRestResponse<LoginResponse> restResponseWithBadRequest = Helpers.SetUpRestResponseWithContent<LoginResponse>(HttpStatusCode.BadRequest, restResponseContent);
+            IRestResponse restResponseWithBadRequest = Helpers.SetUpRestResponseWithContent(HttpStatusCode.BadRequest, restResponseContent);
 
             _request
-                .ExecuteJsonRequest(Arg.Any<string>(), Arg.Any<Method>(), Arg.Any<object>())
-                .Returns(restResponseWithBadRequest);
+                .ExecuteJsonRequest(Arg.Any<string>(), Arg.Any<HttpMethod>(), Arg.Any<object>())
+                .Returns(Task.FromResult(restResponseWithBadRequest));
 
             try
             {
@@ -70,7 +71,7 @@ namespace Usergrid.Sdk.Tests
         }
 
         [Test]
-        public void GetConnectionsReturnsConnectionsAsList()
+        public async void GetConnectionsReturnsConnectionsAsList()
         {
             var connection = new Connection
             {
@@ -81,22 +82,22 @@ namespace Usergrid.Sdk.Tests
 
             var expectedEntities = new List<UsergridEntity>();
             var responseData = new UsergridGetResponse<UsergridEntity>() {Entities = expectedEntities};
-            IRestResponse restResponse = Helpers.SetUpRestResponseWithContent<UsergridGetResponse<UsergridEntity>>(HttpStatusCode.OK, responseData);
+            IRestResponse restResponse = Helpers.SetUpRestResponseWithContent(HttpStatusCode.OK, responseData);
 
             _request
-                .ExecuteJsonRequest(Arg.Any<string>(), Arg.Any<Method>(), Arg.Any<object>())
-                .Returns(restResponse);
+                .ExecuteJsonRequest(Arg.Any<string>(), Arg.Any<HttpMethod>(), Arg.Any<object>())
+                .Returns(Task.FromResult(restResponse));
 
-            var returnedEntities = _connectionManager.GetConnections(connection);
+            var returnedEntities = await _connectionManager.GetConnections(connection);
 
             _request
                 .Received(1)
-                .ExecuteJsonRequest("/users/userName/has",Method.GET);
+                .ExecuteJsonRequest("/users/userName/has",HttpMethod.Get);
             Assert.AreEqual(expectedEntities, returnedEntities);
         }
 
         [Test]
-        public void GetConnectionsReturnsNullWhenConnectionIsNotFound()
+        public async void GetConnectionsReturnsNullWhenConnectionIsNotFound()
         {
             var connection = new Connection
             {
@@ -107,20 +108,20 @@ namespace Usergrid.Sdk.Tests
             IRestResponse restResponse = Helpers.SetUpRestResponse(HttpStatusCode.NotFound);
 
             _request
-                .ExecuteJsonRequest(Arg.Any<string>(), Arg.Any<Method>(), Arg.Any<object>())
-                .Returns(restResponse);
+                .ExecuteJsonRequest(Arg.Any<string>(), Arg.Any<HttpMethod>(), Arg.Any<object>())
+                .Returns(Task.FromResult(restResponse));
 
-            var returnedEntities = _connectionManager.GetConnections(connection);
+            var returnedEntities = await _connectionManager.GetConnections(connection);
 
             _request
                 .Received(1)
-                .ExecuteJsonRequest("/users/userName/has",Method.GET);
+                .ExecuteJsonRequest("/users/userName/has",HttpMethod.Get);
 
             Assert.IsNull(returnedEntities);
         }
 
         [Test]
-        public void GetConnectionsOfSpecificTypeReturnsConnectionsAsListOfConnecteeType()
+        public async void GetConnectionsOfSpecificTypeReturnsConnectionsAsListOfConnecteeType()
         {
             var connection = new Connection
             {
@@ -131,22 +132,22 @@ namespace Usergrid.Sdk.Tests
             };
             var expectedEntities = new List<UsergridDevice>();
             var responseData = new UsergridGetResponse<UsergridDevice>() { Entities = expectedEntities };
-            IRestResponse restResponse = Helpers.SetUpRestResponseWithContent<UsergridGetResponse<UsergridDevice>>(HttpStatusCode.OK, responseData);
+            IRestResponse restResponse = Helpers.SetUpRestResponseWithContent(HttpStatusCode.OK, responseData);
 
             _request
-                .ExecuteJsonRequest(Arg.Any<string>(), Arg.Any<Method>(), Arg.Any<object>())
-                .Returns(restResponse);
+                .ExecuteJsonRequest(Arg.Any<string>(), Arg.Any<HttpMethod>(), Arg.Any<object>())
+                .Returns(Task.FromResult(restResponse));
 
-            var returnedEntities = _connectionManager.GetConnections<UsergridDevice>(connection);
+            var returnedEntities =await _connectionManager.GetConnections<UsergridDevice>(connection);
 
             _request
                 .Received(1)
-                .ExecuteJsonRequest("/users/userName/has/devices", Method.GET);
+                .ExecuteJsonRequest("/users/userName/has/devices", HttpMethod.Get);
             Assert.AreEqual(expectedEntities, returnedEntities);
         }
 
         [Test]
-        public void GetConnectionsOfSpecificTypeReturnsNullWhenConnectionIsNotFound()
+        public async void GetConnectionsOfSpecificTypeReturnsNullWhenConnectionIsNotFound()
         {
             var connection = new Connection
             {
@@ -158,14 +159,14 @@ namespace Usergrid.Sdk.Tests
             IRestResponse restResponse = Helpers.SetUpRestResponse(HttpStatusCode.NotFound);
 
             _request
-                .ExecuteJsonRequest(Arg.Any<string>(), Arg.Any<Method>(), Arg.Any<object>())
-                .Returns(restResponse);
+                .ExecuteJsonRequest(Arg.Any<string>(), Arg.Any<HttpMethod>(), Arg.Any<object>())
+                .Returns(Task.FromResult(restResponse));
 
-            var returnedEntities = _connectionManager.GetConnections<UsergridDevice>(connection);
+            var returnedEntities =await _connectionManager.GetConnections<UsergridDevice>(connection);
 
             _request
                 .Received(1)
-                .ExecuteJsonRequest("/users/userName/has/devices",Method.GET);
+                .ExecuteJsonRequest("/users/userName/has/devices",HttpMethod.Get);
 
             Assert.IsNull(returnedEntities);
         }
@@ -185,8 +186,8 @@ namespace Usergrid.Sdk.Tests
             IRestResponse restResponse = Helpers.SetUpRestResponse(HttpStatusCode.OK);
 
             _request
-                .ExecuteJsonRequest(Arg.Any<string>(), Arg.Any<Method>(), Arg.Any<object>())
-                .Returns(restResponse);
+                .ExecuteJsonRequest(Arg.Any<string>(), Arg.Any<HttpMethod>(), Arg.Any<object>())
+                .Returns(Task.FromResult(restResponse));
 
             _connectionManager.DeleteConnection(connection);
 
@@ -194,7 +195,7 @@ namespace Usergrid.Sdk.Tests
                 .Received(1)
                 .ExecuteJsonRequest(
                     "/users/userName/has/devices/deviceName",
-                    Method.DELETE);
+                    HttpMethod.Delete);
         }
 
         [Test]
@@ -202,11 +203,11 @@ namespace Usergrid.Sdk.Tests
         {
             var connection = new Connection();
             var restResponseContent = new UsergridError { Description = "Exception message", Error = "error code" };
-            IRestResponse<LoginResponse> restResponseWithBadRequest = Helpers.SetUpRestResponseWithContent<LoginResponse>(HttpStatusCode.BadRequest, restResponseContent);
+            IRestResponse restResponseWithBadRequest = Helpers.SetUpRestResponseWithContent(HttpStatusCode.BadRequest, restResponseContent);
 
             _request
-                .ExecuteJsonRequest(Arg.Any<string>(), Arg.Any<Method>(), Arg.Any<object>())
-                .Returns(restResponseWithBadRequest);
+                .ExecuteJsonRequest(Arg.Any<string>(), Arg.Any<HttpMethod>(), Arg.Any<object>())
+                .Returns(Task.FromResult(restResponseWithBadRequest));
 
             try
             {

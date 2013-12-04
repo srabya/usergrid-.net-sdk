@@ -1,4 +1,6 @@
-using RestSharp;
+using System.Net.Http;
+using System.Threading.Tasks;
+using Newtonsoft.Json;
 using Usergrid.Sdk.Model;
 using Usergrid.Sdk.Payload;
 
@@ -10,14 +12,14 @@ namespace Usergrid.Sdk.Manager
         {
         }
 
-        public void ChangePassword(string userName, string oldPassword, string newPassword)
+        public async Task ChangePassword(string userName, string oldPassword, string newPassword)
         {
             var payload = new ChangePasswordPayload {OldPassword = oldPassword, NewPassword = newPassword};
-            IRestResponse response = Request.ExecuteJsonRequest(string.Format("/users/{0}/password", userName), Method.POST, payload);
+            IRestResponse response = await Request.ExecuteJsonRequest(string.Format("/users/{0}/password", userName), HttpMethod.Post, payload);
             ValidateResponse(response);
         }
 
-        public void Login(string loginId, string secret, AuthType authType)
+        public async Task Login(string loginId, string secret, AuthType authType)
         {
             if (authType == AuthType.None)
             {
@@ -27,10 +29,11 @@ namespace Usergrid.Sdk.Manager
 
             object body = GetLoginBody(loginId, secret, authType);
 
-            IRestResponse<LoginResponse> response = Request.ExecuteJsonRequest<LoginResponse>("/token", Method.POST, body);
+            IRestResponse response = await Request.ExecuteJsonRequest("/token", HttpMethod.Post, body);
             ValidateResponse(response);
+            var loginResponse = JsonConvert.DeserializeObject<LoginResponse>(response.Content);
 
-            Request.AccessToken = response.Data.AccessToken;
+            Request.AccessToken = loginResponse.AccessToken;
         }
 
         private object GetLoginBody(string loginId, string secret, AuthType authType)

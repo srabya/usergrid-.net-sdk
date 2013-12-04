@@ -1,3 +1,5 @@
+using Newtonsoft.Json;
+
 namespace Usergrid.Sdk.Model
 {
     public class UsergridGroup : UsergridEntity

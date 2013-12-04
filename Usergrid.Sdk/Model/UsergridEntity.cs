@@ -8,7 +8,6 @@ namespace Usergrid.Sdk.Model
         public string Uuid { get; set; }
         public string Type { get; set; }
         public string Name { get; set; }
-
         [JsonProperty("created")]
         private long createdLong { get; set; }
 
